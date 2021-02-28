@@ -18,7 +18,12 @@
     "test:prettier": "prettier '**/*.{js,jsx,ts,tsx}' --check",
     "posttest": "run-s build"
   },
-  "dependencies": {},
+  "dependencies": {
+    "meyda": "^5.1.0",
+    "raf": "^3.4.1",
+    "random": "^3.0.0",
+    "three": "^0.126.0"
+  },
   "devDependencies": {
     "@snowpack/plugin-typescript": "^1.2.1",
     "@types/node": "^14.14.31",
