@@ -78,11 +78,9 @@ export class HybridAudioVisualization extends AudioVisualization {
     this.composer.setSize(this.canvas.width, this.canvas.height)
     this.composer.addPass(new RenderPass(this.scene, this.camera))
 
+    // setup any post-processing shader effects
     const effect1 = new UnrealBloomPass()
     this.composer.addPass(effect1)
-
-    // const effect2 = new BloomPass()
-    // this.composer.addPass(effect2)
   }
 
   _resize = () => {
@@ -117,7 +115,11 @@ export class HybridAudioVisualization extends AudioVisualization {
 
     // render to the final canvas via webgl
     this.offscreenCanvasMaterial.map!.needsUpdate = true
+
+    // render without post-processing
     // this.renderer.render(this.scene, this.camera)
+
+    // render with post-processing
     this.composer.render()
   }
 }

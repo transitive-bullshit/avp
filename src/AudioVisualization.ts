@@ -91,10 +91,11 @@ export abstract class AudioVisualization {
   }
 
   dispose() {
-    // TODO
+    window.removeEventListener('resize', this._resize)
+    this.audio.disconnect()
   }
 
-  protected _resize = (event: UIEvent) => {
+  protected _resize = () => {
     // TODO: override in subclass
   }
 
