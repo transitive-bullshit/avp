@@ -79,6 +79,7 @@ export class HybridAudioVisualization extends AudioVisualization {
     this.composer.addPass(new RenderPass(this.scene, this.camera))
 
     // setup any post-processing shader effects
+    // @ts-ignore; TODO
     const effect1 = new UnrealBloomPass()
     this.composer.addPass(effect1)
   }
