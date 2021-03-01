@@ -21,7 +21,7 @@
   "dependencies": {
     "meyda": "^5.1.0",
     "raf": "^3.4.1",
-    "random": "^3.0.0",
+    "random": "^3.0.2",
     "three": "^0.126.0"
   },
   "devDependencies": {
