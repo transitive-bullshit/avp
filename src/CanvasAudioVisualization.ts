@@ -18,7 +18,9 @@ export class CanvasAudioVisualization extends AudioVisualization {
   }
 
   protected render() {
-    // TODO
-    console.log('render')
+    // TODO: remove (testing)
+    const { width, height } = this.canvas
+    this.ctx.fillStyle = 'red'
+    this.ctx.fillRect(0, 0, width, height)
   }
 }

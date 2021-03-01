@@ -1,8 +1,13 @@
 import {
-  WebGLRenderer as ThreeWebGLRenderer,
-  Scene as ThreeScene,
-  Camera as ThreeCamera
+  WebGLRenderer,
+  Scene,
+  Camera,
+  MeshBasicMaterial,
+  CanvasTexture,
+  PlaneGeometry,
+  Mesh
 } from 'three'
+import { modifyShader } from 'three/examples/jsm/modifiers/CurveModifier'
 
 import {
   AudioVisualization,
@@ -10,16 +15,17 @@ import {
 } from './AudioVisualization'
 
 interface HybridAudioVisualizationOptions extends AudioVisualizationOptions {
-  offscreenCanvas?: OffscreenCanvas
+  offscreenCanvas?: HTMLCanvasElement
 }
 
 export class HybridAudioVisualization extends AudioVisualization {
-  offscreenCanvas: OffscreenCanvas
-  ctx: OffscreenCanvasRenderingContext2D
+  offscreenCanvas: HTMLCanvasElement
+  ctx: CanvasRenderingContext2D
 
-  renderer: ThreeWebGLRenderer
-  scene: ThreeScene
-  camera: ThreeCamera
+  renderer: WebGLRenderer
+  scene: Scene
+  camera: Camera
+  offscreenCanvasMaterial: MeshBasicMaterial
 
   constructor(opts: HybridAudioVisualizationOptions) {
     super(opts)
@@ -27,10 +33,9 @@ export class HybridAudioVisualization extends AudioVisualization {
     if (opts.offscreenCanvas) {
       this.offscreenCanvas = opts.offscreenCanvas
     } else {
-      this.offscreenCanvas = new OffscreenCanvas(
-        this.canvas.width,
-        this.canvas.height
-      )
+      this.offscreenCanvas = document.createElement('canvas')
+      this.offscreenCanvas.width = this.canvas.width
+      this.offscreenCanvas.height = this.canvas.height
     }
 
     const ctx = this.offscreenCanvas.getContext('2d')
@@ -40,7 +45,7 @@ export class HybridAudioVisualization extends AudioVisualization {
       throw new Error('Unable to initialize offscreen canvas 2d context')
     }
 
-    this.renderer = new ThreeWebGLRenderer({
+    this.renderer = new WebGLRenderer({
       antialias: true,
       canvas: this.canvas
     })
@@ -48,8 +53,16 @@ export class HybridAudioVisualization extends AudioVisualization {
     this.renderer.setClearColor(0x000000)
     this.renderer.setPixelRatio(window.devicePixelRatio)
 
-    this.scene = new ThreeScene()
-    this.camera = new ThreeCamera()
+    this.scene = new Scene()
+    this.camera = new Camera()
+
+    this.offscreenCanvasMaterial = new MeshBasicMaterial()
+    this.offscreenCanvasMaterial.map = new CanvasTexture(this.offscreenCanvas)
+
+    const geometry = new PlaneGeometry(2, 2)
+    const mesh = new Mesh(geometry, this.offscreenCanvasMaterial)
+    mesh.scale.setY(-1)
+    this.scene.add(mesh)
   }
 
   _resize = () => {
@@ -61,6 +74,28 @@ export class HybridAudioVisualization extends AudioVisualization {
   }
 
   protected render() {
+    // TODO: remove (testing)
+    this.analyser.getFrequencyData()
+    const avg = this.analyser.getAverageFrequency()
+
+    // draw to the offscreen canvas via html5 2d canvas api
+    const { width, height } = this.offscreenCanvas
+    this.ctx.clearRect(0, 0, width, height)
+
+    const n = this.analyser.data.length
+    const invN = width / n
+    this.ctx.fillStyle = '#F998B9'
+
+    for (let i = 0; i < n; ++i) {
+      const amp = this.analyser.data[i] / 255.0
+      const x0 = i * invN
+      const y = 0
+      const h = amp * height
+      this.ctx.fillRect(x0, y, invN, h)
+    }
+
+    // render to the final canvas via webgl
+    this.offscreenCanvasMaterial.map!.needsUpdate = true
     this.renderer.render(this.scene, this.camera)
   }
 }
