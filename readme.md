@@ -1,6 +1,6 @@
 # Audio Visual Playground
 
-[![Build Status](https://github.com/transitive-bullshit/avp/actions/workflows/test.yml/badge.svg)](https://github.com/transitive-bullshit/avp/actions/workflows/test.yml) [![Prettier Code Formatting](https://img.shields.io/badge/code_style-prettier-brightgreen.svg)](https://prettier.io)
+[![Build Status](https://github.com/transitive-bullshit/avp/actions/workflows/build.yml/badge.svg)](https://github.com/transitive-bullshit/avp/actions/workflows/build.yml) [![Prettier Code Formatting](https://img.shields.io/badge/code_style-prettier-brightgreen.svg)](https://prettier.io)
 
 TODO: readme
 
