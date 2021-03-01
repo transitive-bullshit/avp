@@ -7,7 +7,16 @@ import {
   PlaneGeometry,
   Mesh
 } from 'three'
-import { modifyShader } from 'three/examples/jsm/modifiers/CurveModifier'
+
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js'
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js'
+// import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js'
+// import { BloomPass } from 'three/examples/jsm/postprocessing/BloomPass.js'
+// import { DotScreenPass } from 'three/examples/jsm/postprocessing/DotScreenPass'
+// import { GlitchPass } from 'three/examples/jsm/postprocessing/GlitchPass'
+// import { AfterimagePass } from 'three/examples/jsm/postprocessing/AfterimagePass'
+// import { FilmPass } from 'three/examples/jsm/postprocessing/FilmPass'
+import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass'
 
 import {
   AudioVisualization,
@@ -26,6 +35,7 @@ export class HybridAudioVisualization extends AudioVisualization {
   scene: Scene
   camera: Camera
   offscreenCanvasMaterial: MeshBasicMaterial
+  composer: EffectComposer
 
   constructor(opts: HybridAudioVisualizationOptions) {
     super(opts)
@@ -63,6 +73,16 @@ export class HybridAudioVisualization extends AudioVisualization {
     const mesh = new Mesh(geometry, this.offscreenCanvasMaterial)
     mesh.scale.setY(-1)
     this.scene.add(mesh)
+
+    this.composer = new EffectComposer(this.renderer)
+    this.composer.setSize(this.canvas.width, this.canvas.height)
+    this.composer.addPass(new RenderPass(this.scene, this.camera))
+
+    const effect1 = new UnrealBloomPass()
+    this.composer.addPass(effect1)
+
+    // const effect2 = new BloomPass()
+    // this.composer.addPass(effect2)
   }
 
   _resize = () => {
@@ -71,12 +91,13 @@ export class HybridAudioVisualization extends AudioVisualization {
     this.offscreenCanvas.width = width
     this.offscreenCanvas.height = height
     this.renderer.setSize(width, height)
+    this.composer.setSize(width, height)
   }
 
   protected render() {
     // TODO: remove (testing)
     this.analyser.getFrequencyData()
-    const avg = this.analyser.getAverageFrequency()
+    // const avg = this.analyser.getAverageFrequency()
 
     // draw to the offscreen canvas via html5 2d canvas api
     const { width, height } = this.offscreenCanvas
@@ -96,6 +117,7 @@ export class HybridAudioVisualization extends AudioVisualization {
 
     // render to the final canvas via webgl
     this.offscreenCanvasMaterial.map!.needsUpdate = true
-    this.renderer.render(this.scene, this.camera)
+    // this.renderer.render(this.scene, this.camera)
+    this.composer.render()
   }
 }
