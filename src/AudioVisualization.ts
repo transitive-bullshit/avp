@@ -86,6 +86,16 @@ export abstract class AudioVisualization {
 
     const fftSize = opts.fftSize || 1024
     this.analyser = new ThreeAudioAnalyser(this.audio, fftSize)
+
+    window.addEventListener('resize', this._resize)
+  }
+
+  dispose() {
+    // TODO
+  }
+
+  protected _resize = (event: UIEvent) => {
+    // TODO: override in subclass
   }
 
   public start() {
@@ -114,5 +124,6 @@ export abstract class AudioVisualization {
     this.render()
   }
 
+  // TODO: override in subclass
   protected abstract render(): void
 }
