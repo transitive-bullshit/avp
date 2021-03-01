@@ -24,7 +24,7 @@ export interface AudioVisualizationOptions {
 export type AnimationStatus = 'stopped' | 'playing'
 
 export abstract class AudioVisualization {
-  domElement: HTMLCanvasElement | OffscreenCanvas
+  canvas: HTMLCanvasElement | OffscreenCanvas
 
   mediaElement?: HTMLMediaElement
   mediaStream?: MediaStream
@@ -41,7 +41,11 @@ export abstract class AudioVisualization {
     this.status = 'stopped'
     this._rafHandle = null
 
-    this.domElement = opts.canvas
+    if (!opts.canvas) {
+      throw new Error('AudioVisualization requires "canvas"')
+    }
+
+    this.canvas = opts.canvas
 
     this.mediaElement = opts.mediaElement
     this.mediaStream = opts.mediaStream
