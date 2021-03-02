@@ -1,5 +1,5 @@
-import audioUrl from '../audio/Wizard-DreamOn.mp3'
-// import audioUrl from '../audio/ChillyGonzales-SampleThis.mp3'
+// import audioUrl from '../audio/Wizard-DreamOn.mp3'
+import audioUrl from '../audio/ChillyGonzales-SampleThis.mp3'
 // import audioUrl from '../audio/EverythingPersists-AndThenYouSeeIt.mp3'
 // import audioUrl from '../audio/FortMinor-WheredYouGo.mp3'
 
@@ -20,6 +20,9 @@ play?.addEventListener('click', () => {
     canvas,
     mediaUrl: audioUrl,
     autoplay: true,
+    offscreenScale: 2.0,
+    featureExtractors: ['loudness'],
+    drawStyle: 'quadratic',
     fftSize: 64
   })
 

@@ -1,3 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable prefer-const */
+/* eslint-disable no-unused-vars */
+
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass'
 import { AfterimagePass } from 'three/examples/jsm/postprocessing/AfterimagePass'
 
@@ -8,32 +12,65 @@ import {
   HybridAudioVisualizationOptions
 } from './HybridAudioVisualization'
 
+type DrawStyle = 'discrete' | 'linear' | 'quadratic'
+
+type MeydaAudioFeature =
+  | 'amplitudeSpectrum'
+  | 'buffer'
+  | 'chroma'
+  | 'complexSpectrum'
+  | 'energy'
+  | 'loudness'
+  | 'mfcc'
+  | 'perceptualSharpness'
+  | 'perceptualSpread'
+  | 'powerSpectrum'
+  | 'rms'
+  | 'spectralCentroid'
+  | 'spectralFlatness'
+  | 'spectralKurtosis'
+  | 'spectralRolloff'
+  | 'spectralSkewness'
+  | 'spectralSlope'
+  | 'spectralSpread'
+  | 'zcr'
+
+export interface BloomFilterVisualizationOptions
+  extends HybridAudioVisualizationOptions {
+  drawStyle?: DrawStyle
+  featureExtractors?: ReadonlyArray<MeydaAudioFeature>
+}
+
 export class BloomFilterAudioVisualization extends HybridAudioVisualization {
   meyda: Meyda.MeydaAnalyzer
+  drawStyle: DrawStyle
+  featureExtractors: ReadonlyArray<MeydaAudioFeature>
 
-  constructor(opts: HybridAudioVisualizationOptions) {
+  constructor(opts: BloomFilterVisualizationOptions) {
     super(opts)
+
+    this.drawStyle = opts.drawStyle ?? 'discrete'
+    this.featureExtractors = opts.featureExtractors ?? ['loudness']
 
     this.meyda = Meyda.createMeydaAnalyzer({
       audioContext: this.audio.context,
       source: this.analyser.analyser,
       bufferSize: 512,
-      featureExtractors: [
-        // 'powerSpectrum',
-        // 'spectralCentroid',
-        // 'chroma',
-        // 'mfcc'
-        'loudness'
-        // 'powerSpectrum'
-      ]
+      featureExtractors: this.featureExtractors
+      // 'powerSpectrum',
+      // 'spectralCentroid',
+      // 'chroma',
+      // 'mfcc'
+      // 'loudness'
+      // 'powerSpectrum'
     })
 
     // setup any post-processing shader effects
-    // {
-    //   // @ts-ignore; TODO
-    //   const effect1 = new UnrealBloomPass()
-    //   this.composer.addPass(effect1)
-    // }
+    {
+      // @ts-ignore; TODO
+      const effect1 = new UnrealBloomPass()
+      this.composer.addPass(effect1)
+    }
 
     // {
     //   const effect1 = new AfterimagePass()
@@ -52,16 +89,19 @@ export class BloomFilterAudioVisualization extends HybridAudioVisualization {
   }
 
   protected render() {
-    // TODO: remove (testing)
+    // we're relying on meyda for audio analysis
     // this.analyser.getFrequencyData()
     // const spectrum = this.analyser.data
 
-    const feature = 'loudness'
-    const s = this.meyda.get([feature])
-    if (!s) {
+    const feature = this.featureExtractors[0]
+    const features = this.meyda.get([feature])
+    if (!features) {
       return
     }
-    const spectrum = s[feature]?.specific
+    const spectrum =
+      feature === 'loudness'
+        ? features[feature]?.specific
+        : (features[feature] as Float32Array | number[])
     if (!spectrum) {
       return
     }
@@ -81,7 +121,7 @@ export class BloomFilterAudioVisualization extends HybridAudioVisualization {
     meanS /= n
     const diff = maxS - meanS
 
-    const data = []
+    const data: { x: number; y: number; value: number }[] = []
     for (let i = 0; i < n; ++i) {
       const sample = spectrum[i]
       // take the normalized sample value
@@ -91,7 +131,7 @@ export class BloomFilterAudioVisualization extends HybridAudioVisualization {
       let value = Math.max(0, (sample - meanS) / diff)
 
       // accentuate differences in the signal
-      // value = Math.max(0, Math.min(1, Math.pow(value, 4)))
+      value = Math.max(0, Math.min(1, Math.pow(value, 4)))
 
       const x = i * invN
       const y = value * height
@@ -105,35 +145,93 @@ export class BloomFilterAudioVisualization extends HybridAudioVisualization {
 
     // draw to the offscreen canvas via html5 2d canvas api
     this.ctx.clearRect(0, 0, width, height)
-    this.ctx.save()
-
-    this.ctx.translate(width / 2 - width / 4, height / 2 + height / 3)
-    this.ctx.scale(0.5, 1.0 / 20.0)
     this.ctx.fillStyle = '#fff'
 
-    // this.ctx.beginPath()
-    // this.ctx.moveTo(0, 0)
+    const drawSamples = () => {
+      if (this.drawStyle !== 'discrete') {
+        this.ctx.beginPath()
+        this.ctx.moveTo(0, 0)
+      }
 
-    for (let i = 0; i < n - 1; ++i) {
-      const { x: x0, y: y0 } = data[i]
-      const { x: x1, y: y1 } = data[i + 1]
+      for (let i = 0; i < n - 1; ++i) {
+        const { x: x0, y: y0 } = data[i]
+        const { x: x1, y: y1 } = data[i + 1]
 
-      const xMid = (x0 + x1) / 2
-      const yMid = (y0 + y1) / 2
-      const cpx0 = (xMid + x0) / 2
-      const cpx1 = (xMid + x1) / 2
-      // this.ctx.quadraticCurveTo(cpx0, y0, xMid, yMid)
-      // this.ctx.quadraticCurveTo(cpx1, y1, x1, y1)
+        const xMid = (x0 + x1) / 2
+        const yMid = (y0 + y1) / 2
+        const cpx0 = (xMid + x0) / 2
+        const cpx1 = (xMid + x1) / 2
 
-      // this.ctx.lineTo(x0, y0)
+        if (this.drawStyle === 'quadratic') {
+          this.ctx.quadraticCurveTo(cpx0, y0, xMid, yMid)
+          this.ctx.quadraticCurveTo(cpx1, y1, x1, y1)
+        } else if (this.drawStyle === 'linear') {
+          this.ctx.lineTo(x0, y0)
+        } else {
+          this.ctx.fillRect(x0, 0, (x1 - x0) / 2, yMid)
+        }
+      }
 
-      this.ctx.fillRect(x0, 0, (x1 - x0) / 2, yMid)
+      if (this.drawStyle !== 'discrete') {
+        this.ctx.lineTo(data[data.length - 1].x, 0)
+        this.ctx.closePath()
+        this.ctx.fill()
+      }
+
+      this.ctx.fillRect(0, 0, width, 4)
     }
-    // this.ctx.lineTo(data[data.length - 1].x, 0)
-    // this.ctx.closePath()
-    // this.ctx.fill()
 
-    this.ctx.restore()
+    {
+      // draw a triangle
+      const p0 = {
+        x: width / 4,
+        y: (height * 3) / 4
+      }
+
+      const p1 = {
+        x: (width * 3) / 4,
+        y: (height * 3) / 4
+      }
+
+      const p2 = {
+        x: width / 2,
+        y: (height * 1) / 4
+      }
+
+      const scaleX = (p1.x - p0.x) / width
+      const scaleY = 1.0 / 20.0
+      const h = p0.y - p2.y
+      const w = p2.x - p0.x
+      const t0 = Math.atan2(h, w)
+      const h0 = Math.sqrt(w * w + h * h)
+      const hs = h0 / width
+
+      this.ctx.save()
+      this.ctx.translate(p0.x, p0.y)
+      this.ctx.scale(scaleX, scaleY)
+      drawSamples()
+      this.ctx.restore()
+
+      console.log(h0, width, hs)
+      this.ctx.save()
+      this.ctx.translate(p0.x, p0.y)
+      this.ctx.rotate(-t0)
+      this.ctx.scale(hs, -scaleY)
+      drawSamples()
+      this.ctx.restore()
+
+      this.ctx.save()
+      this.ctx.translate(p1.x, p1.y)
+      this.ctx.rotate(Math.PI + t0)
+      this.ctx.scale(hs, scaleY)
+      drawSamples()
+      this.ctx.restore()
+    }
+
+    // just draw normally
+    // this.ctx.save()
+    // drawSamples()
+    // this.ctx.restore()
 
     // tell webgl that the canvas texture needs updating
     this.offscreenCanvasMaterial.map!.needsUpdate = true

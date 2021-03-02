@@ -19,11 +19,13 @@ import {
 export interface HybridAudioVisualizationOptions
   extends AudioVisualizationOptions {
   offscreenCanvas?: HTMLCanvasElement
+  offscreenScale?: number
 }
 
 export class HybridAudioVisualization extends AudioVisualization {
   offscreenCanvas: HTMLCanvasElement
   ctx: CanvasRenderingContext2D
+  offscreenScale: number
 
   renderer: WebGLRenderer
   scene: Scene
@@ -34,12 +36,14 @@ export class HybridAudioVisualization extends AudioVisualization {
   constructor(opts: HybridAudioVisualizationOptions) {
     super(opts)
 
+    this.offscreenScale = opts.offscreenScale || 1.0
+
     if (opts.offscreenCanvas) {
       this.offscreenCanvas = opts.offscreenCanvas
     } else {
       this.offscreenCanvas = document.createElement('canvas')
-      this.offscreenCanvas.width = this.canvas.width
-      this.offscreenCanvas.height = this.canvas.height
+      this.offscreenCanvas.width = this.canvas.width * this.offscreenScale
+      this.offscreenCanvas.height = this.canvas.height * this.offscreenScale
     }
 
     const ctx = this.offscreenCanvas.getContext('2d')
@@ -75,16 +79,19 @@ export class HybridAudioVisualization extends AudioVisualization {
 
   _resize = () => {
     super._resize()
-    // TODO: decouple internal canvas size from the output canvas size
+
     const { width, height } = this.canvas
-    this.offscreenCanvas.width = width
-    this.offscreenCanvas.height = height
+
+    this.offscreenCanvas.width = width * this.offscreenScale
+    this.offscreenCanvas.height = height * this.offscreenScale
+
     this.renderer.setSize(width, height)
     this.composer.setSize(width, height)
   }
 
+  // super basic example renderer that mixes offscreen canvas rendering with
+  // webgl post-processing
   protected render() {
-    // TODO: remove (testing)
     this.analyser.getFrequencyData()
 
     // draw to the offscreen canvas via html5 2d canvas api
