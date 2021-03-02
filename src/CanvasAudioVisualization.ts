@@ -18,9 +18,10 @@ export class CanvasAudioVisualization extends AudioVisualization {
   }
 
   protected render() {
-    // TODO: remove (testing)
-    const { width, height } = this.canvas
-    this.ctx.fillStyle = 'red'
-    this.ctx.fillRect(0, 0, width, height)
+    // TODO: override in subclass
+    // this.analyser.getFrequencyData()
+    // const { width, height } = this.canvas
+    // this.ctx.fillStyle = 'red'
+    // this.ctx.fillRect(0, 0, width, height)
   }
 }

@@ -1,5 +1,5 @@
 {
-  "include": ["src", "types", "index.d.ts", "node_modules/@types"],
+  "include": ["src", "types", "index.d.ts", "node_modules/@types", "src/.ts"],
   "compilerOptions": {
     "lib": ["dom", "dom.iterable", "esnext"],
     "module": "esnext",

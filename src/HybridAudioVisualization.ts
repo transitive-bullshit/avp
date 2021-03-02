@@ -10,20 +10,14 @@ import {
 
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js'
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js'
-// import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js'
-// import { BloomPass } from 'three/examples/jsm/postprocessing/BloomPass.js'
-// import { DotScreenPass } from 'three/examples/jsm/postprocessing/DotScreenPass'
-// import { GlitchPass } from 'three/examples/jsm/postprocessing/GlitchPass'
-// import { AfterimagePass } from 'three/examples/jsm/postprocessing/AfterimagePass'
-// import { FilmPass } from 'three/examples/jsm/postprocessing/FilmPass'
-import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass'
 
 import {
   AudioVisualization,
   AudioVisualizationOptions
 } from './AudioVisualization'
 
-interface HybridAudioVisualizationOptions extends AudioVisualizationOptions {
+export interface HybridAudioVisualizationOptions
+  extends AudioVisualizationOptions {
   offscreenCanvas?: HTMLCanvasElement
 }
 
@@ -77,14 +71,10 @@ export class HybridAudioVisualization extends AudioVisualization {
     this.composer = new EffectComposer(this.renderer)
     this.composer.setSize(this.canvas.width, this.canvas.height)
     this.composer.addPass(new RenderPass(this.scene, this.camera))
-
-    // setup any post-processing shader effects
-    // @ts-ignore; TODO
-    const effect1 = new UnrealBloomPass()
-    this.composer.addPass(effect1)
   }
 
   _resize = () => {
+    super._resize()
     // TODO: decouple internal canvas size from the output canvas size
     const { width, height } = this.canvas
     this.offscreenCanvas.width = width
@@ -96,7 +86,6 @@ export class HybridAudioVisualization extends AudioVisualization {
   protected render() {
     // TODO: remove (testing)
     this.analyser.getFrequencyData()
-    // const avg = this.analyser.getAverageFrequency()
 
     // draw to the offscreen canvas via html5 2d canvas api
     const { width, height } = this.offscreenCanvas
