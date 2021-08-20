@@ -18,6 +18,7 @@ interface Sample {
 }
 
 export type DrawStyle = 'discrete' | 'linear' | 'quadratic'
+export type DrawShape = 'basic' | 'triangle'
 
 export type MeydaAudioFeature =
   | 'amplitudeSpectrum'
@@ -43,6 +44,7 @@ export type MeydaAudioFeature =
 export interface BloomFilterVisualizationOptions
   extends HybridAudioVisualizationOptions {
   drawStyle?: DrawStyle
+  drawShape?: DrawShape
   featureExtractor?: MeydaAudioFeature
   smoothingFactor?: number
   accentuationFactor?: number
@@ -55,6 +57,7 @@ export interface BloomFilterVisualizationOptions
 export class BloomFilterAudioVisualization extends HybridAudioVisualization {
   meyda: Meyda.MeydaAnalyzer
   drawStyle: DrawStyle
+  drawShape: Drawhape
   featureExtractor: MeydaAudioFeature
   maxRMS: number
   smoothingFactor: number
@@ -66,6 +69,7 @@ export class BloomFilterAudioVisualization extends HybridAudioVisualization {
     super(opts)
 
     this.drawStyle = opts.drawStyle ?? 'discrete'
+    this.drawShape = opts.drawShape ?? 'triangle'
     this.featureExtractor = opts.featureExtractor ?? 'loudness'
     this.maxRMS = 0
     this.smoothingFactor = Math.max(
@@ -251,57 +255,57 @@ export class BloomFilterAudioVisualization extends HybridAudioVisualization {
       this.ctx.fillRect(0, 0, width, 4)
     }
 
-    // {
-    //   // draw a triangle
-    //   const p0 = {
-    //     x: width / 4,
-    //     y: (height * 3) / 4
-    //   }
+    if (this.drawShape === 'triangle') {
+      // draw a triangle
+      const p0 = {
+        x: width / 4,
+        y: (height * 3) / 4
+      }
 
-    //   const p1 = {
-    //     x: (width * 3) / 4,
-    //     y: (height * 3) / 4
-    //   }
+      const p1 = {
+        x: (width * 3) / 4,
+        y: (height * 3) / 4
+      }
 
-    //   const p2 = {
-    //     x: width / 2,
-    //     y: (height * 1) / 4
-    //   }
+      const p2 = {
+        x: width / 2,
+        y: (height * 1) / 4
+      }
 
-    //   const scaleX = (p1.x - p0.x) / width
-    //   const scaleY = 0.15
-    //   const h = p0.y - p2.y
-    //   const w = p2.x - p0.x
-    //   const t0 = Math.atan2(h, w)
-    //   const h0 = Math.sqrt(w * w + h * h)
-    //   const hs = h0 / width
+      const scaleX = (p1.x - p0.x) / width
+      const scaleY = 0.15
+      const h = p0.y - p2.y
+      const w = p2.x - p0.x
+      const t0 = Math.atan2(h, w)
+      const h0 = Math.sqrt(w * w + h * h)
+      const hs = h0 / width
 
-    //   this.ctx.save()
-    //   this.ctx.translate(p0.x, p0.y)
-    //   this.ctx.scale(scaleX, scaleY)
-    //   drawSamples()
-    //   this.ctx.restore()
+      this.ctx.save()
+      this.ctx.translate(p0.x, p0.y)
+      this.ctx.scale(scaleX, scaleY)
+      drawSamples()
+      this.ctx.restore()
 
-    //   // console.log(h0, width, hs)
-    //   this.ctx.save()
-    //   this.ctx.translate(p0.x, p0.y)
-    //   this.ctx.rotate(-t0)
-    //   this.ctx.scale(hs, -scaleY)
-    //   drawSamples()
-    //   this.ctx.restore()
+      // console.log(h0, width, hs)
+      this.ctx.save()
+      this.ctx.translate(p0.x, p0.y)
+      this.ctx.rotate(-t0)
+      this.ctx.scale(hs, -scaleY)
+      drawSamples()
+      this.ctx.restore()
 
-    //   this.ctx.save()
-    //   this.ctx.translate(p1.x, p1.y)
-    //   this.ctx.rotate(Math.PI + t0)
-    //   this.ctx.scale(hs, scaleY)
-    //   drawSamples()
-    //   this.ctx.restore()
-    // }
-
-    // just draw normally
-    this.ctx.save()
-    drawSamples()
-    this.ctx.restore()
+      this.ctx.save()
+      this.ctx.translate(p1.x, p1.y)
+      this.ctx.rotate(Math.PI + t0)
+      this.ctx.scale(hs, scaleY)
+      drawSamples()
+      this.ctx.restore()
+    } else if (this.drawShape === 'basic') {
+      // just draw normally
+      this.ctx.save()
+      drawSamples()
+      this.ctx.restore()
+    }
 
     // tell webgl that the canvas texture needs updating
     this.offscreenCanvasMaterial.map!.needsUpdate = true

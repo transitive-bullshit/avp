@@ -11,6 +11,7 @@ import audioUrl from '../audio/voice.m4a'
 import {
   BloomFilterAudioVisualization as AudioViz,
   DrawStyle,
+  DrawShape,
   MeydaAudioFeature
 } from './BloomFilterAudioVisualization'
 
@@ -20,6 +21,7 @@ const params = {
   offscreenScale: 2.0,
   featureExtractor: 'loudness' as MeydaAudioFeature,
   drawStyle: 'quadratic' as DrawStyle,
+  drawShape: 'triangle' as DrawShape,
   fftSize: 256,
   smoothingFactor: 0.7,
   accentuationFactor: 3.0,
@@ -44,6 +46,13 @@ gui
   ])
   .name('feature')
   .onFinishChange(restart)
+gui
+  .add(params, 'drawShape')
+  .options(['triangle', 'basic'])
+  .name('shape')
+  .onChange((value) => {
+    vis.drawShape = value
+  })
 gui
   .add(params, 'drawStyle')
   .options(['quadratic', 'linear', 'discrete'])
