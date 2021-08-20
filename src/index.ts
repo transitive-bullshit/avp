@@ -20,7 +20,7 @@ let vis: AudioViz
 const params = {
   offscreenScale: 2.0,
   featureExtractor: 'loudness' as MeydaAudioFeature,
-  drawStyle: 'quadratic' as DrawStyle,
+  drawStyle: 'curves' as DrawStyle,
   drawShape: 'triangle' as DrawShape,
   fftSize: 256,
   smoothingFactor: 0.7,
@@ -55,7 +55,7 @@ gui
   })
 gui
   .add(params, 'drawStyle')
-  .options(['quadratic', 'linear', 'discrete'])
+  .options(['curves', 'lines', 'bars'])
   .name('style')
   .onChange((value) => {
     vis.drawStyle = value
@@ -112,13 +112,6 @@ function restart() {
     mediaUrl: audioUrl,
     autoplay: false,
     ...params
-    // offscreenScale: 2.0,
-    // featureExtractor: 'loudness',
-    // drawStyle: 'quadratic',
-    // fftSize: 256,
-    // smoothingFactor: 0.7,
-    // accentuationFactor: 3.0,
-    // visualScalingFactor: 1.0
   })
 
   vis.start()

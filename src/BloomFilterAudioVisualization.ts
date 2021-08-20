@@ -17,7 +17,7 @@ interface Sample {
   y: number
 }
 
-export type DrawStyle = 'discrete' | 'linear' | 'quadratic'
+export type DrawStyle = 'bars' | 'lines' | 'curves'
 export type DrawShape = 'basic' | 'triangle'
 
 export type MeydaAudioFeature =
@@ -68,7 +68,7 @@ export class BloomFilterAudioVisualization extends HybridAudioVisualization {
   constructor(opts: BloomFilterVisualizationOptions) {
     super(opts)
 
-    this.drawStyle = opts.drawStyle ?? 'discrete'
+    this.drawStyle = opts.drawStyle ?? 'bars'
     this.drawShape = opts.drawShape ?? 'triangle'
     this.featureExtractor = opts.featureExtractor ?? 'loudness'
     this.maxRMS = 0
@@ -216,7 +216,7 @@ export class BloomFilterAudioVisualization extends HybridAudioVisualization {
     this.ctx.fillStyle = '#fff'
 
     const drawSamples = () => {
-      if (this.drawStyle !== 'discrete') {
+      if (this.drawStyle !== 'bars') {
         this.ctx.beginPath()
         this.ctx.moveTo(0, 0)
       }
@@ -229,7 +229,7 @@ export class BloomFilterAudioVisualization extends HybridAudioVisualization {
         const x1 = sample1.x
         const y1 = sample1.y * this.visualScalingFactor * height
 
-        if (this.drawStyle === 'quadratic') {
+        if (this.drawStyle === 'curves') {
           const xMid = (x0 + x1) / 2
           const yMid = (y0 + y1) / 2
           const cpx0 = (xMid + x0) / 2
@@ -237,7 +237,7 @@ export class BloomFilterAudioVisualization extends HybridAudioVisualization {
 
           this.ctx.quadraticCurveTo(cpx0, y0, xMid, yMid)
           this.ctx.quadraticCurveTo(cpx1, y1, x1, y1)
-        } else if (this.drawStyle === 'linear') {
+        } else if (this.drawStyle === 'lines') {
           this.ctx.lineTo(x0, y0)
         } else {
           const yMid = (y0 + y1) / 2
@@ -245,7 +245,7 @@ export class BloomFilterAudioVisualization extends HybridAudioVisualization {
         }
       }
 
-      if (this.drawStyle !== 'discrete') {
+      if (this.drawStyle !== 'bars') {
         this.ctx.lineTo(this._samples[n - 1].x, 0)
         this.ctx.closePath()
         this.ctx.fill()
