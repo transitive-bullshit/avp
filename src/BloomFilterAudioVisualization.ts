@@ -43,7 +43,7 @@ type MeydaAudioFeature =
 export interface BloomFilterVisualizationOptions
   extends HybridAudioVisualizationOptions {
   drawStyle?: DrawStyle
-  featureExtractors?: ReadonlyArray<MeydaAudioFeature>
+  featureExtractor?: MeydaAudioFeature
   smoothingFactor?: number
   accentuationFactor?: number
   visualScalingFactor?: number
@@ -55,7 +55,7 @@ export interface BloomFilterVisualizationOptions
 export class BloomFilterAudioVisualization extends HybridAudioVisualization {
   meyda: Meyda.MeydaAnalyzer
   drawStyle: DrawStyle
-  featureExtractors: ReadonlyArray<MeydaAudioFeature>
+  featureExtractor: MeydaAudioFeature
   maxRMS: number
   smoothingFactor: number
   accentuationFactor: number
@@ -66,7 +66,7 @@ export class BloomFilterAudioVisualization extends HybridAudioVisualization {
     super(opts)
 
     this.drawStyle = opts.drawStyle ?? 'discrete'
-    this.featureExtractors = opts.featureExtractors ?? ['loudness']
+    this.featureExtractor = opts.featureExtractor ?? 'loudness'
     this.maxRMS = 0
     this.smoothingFactor = Math.max(
       0.0,
@@ -84,7 +84,7 @@ export class BloomFilterAudioVisualization extends HybridAudioVisualization {
       bufferSize: opts.bufferSize ?? 1024,
       // smaller => smoother but more computation
       hopSize: opts.hopSize ?? 512,
-      featureExtractors: this.featureExtractors.concat(['rms']),
+      featureExtractors: [this.featureExtractor].concat(['rms']),
       numberOfBarkBands: opts.numberOfBarkBands ?? 32
       // numberOfMFCCCoefficients: 128
       // sampleRate: 100
@@ -136,7 +136,7 @@ export class BloomFilterAudioVisualization extends HybridAudioVisualization {
     this.maxRMS = Math.max(this.maxRMS, rms)
     const frameWeight = this.maxRMS <= 0 ? 1.0 : rms / this.maxRMS
 
-    const feature = this.featureExtractors[0]
+    const feature = this.featureExtractor
     const features = this.meyda.get([feature])
     if (!features) {
       return

@@ -37,7 +37,6 @@ export abstract class AudioVisualization {
   protected _rafHandle: number | null
 
   constructor(opts: AudioVisualizationOptions) {
-    console.log('AudioViz', opts)
     this._rafHandle = null
 
     if (!opts.canvas) {

@@ -22,7 +22,7 @@ play?.addEventListener('click', () => {
     mediaUrl: audioUrl,
     autoplay: true,
     offscreenScale: 2.0,
-    featureExtractors: ['loudness'],
+    featureExtractor: 'loudness',
     drawStyle: 'quadratic',
     fftSize: 256,
     smoothingFactor: 0.7,
