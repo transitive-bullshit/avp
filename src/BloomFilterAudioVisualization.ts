@@ -45,7 +45,8 @@ export interface BloomFilterVisualizationOptions
   drawStyle?: DrawStyle
   featureExtractors?: ReadonlyArray<MeydaAudioFeature>
   smoothingFactor?: number
-  accentuationFActor?: number
+  accentuationFactor?: number
+  visualScalingFactor?: number
   bufferSize?: number
   hopSize?: number
   numberOfBarkBands?: number
@@ -58,6 +59,7 @@ export class BloomFilterAudioVisualization extends HybridAudioVisualization {
   maxRMS: number
   smoothingFactor: number
   accentuationFactor: number
+  visualScalingFactor: number
   _samples: Sample[] = []
 
   constructor(opts: BloomFilterVisualizationOptions) {
@@ -72,8 +74,9 @@ export class BloomFilterAudioVisualization extends HybridAudioVisualization {
     )
     this.accentuationFactor = Math.max(
       1.0,
-      Math.min(128.0, opts.accentuationFActor ?? 2.0)
+      Math.min(128.0, opts.accentuationFactor ?? 2.0)
     )
+    this.visualScalingFactor = Math.max(0.00001, opts.visualScalingFactor ?? 1)
 
     this.meyda = Meyda.createMeydaAnalyzer({
       audioContext: this.audio.context,
@@ -198,8 +201,12 @@ export class BloomFilterAudioVisualization extends HybridAudioVisualization {
       }
 
       for (let i = 0; i < n - 1; ++i) {
-        const { x: x0, y: y0 } = this._samples[i]
-        const { x: x1, y: y1 } = this._samples[i + 1]
+        const sample0 = this._samples[i]
+        const sample1 = this._samples[i + 1]
+        const x0 = sample0.x
+        const y0 = sample0.y * this.visualScalingFactor
+        const x1 = sample1.x
+        const y1 = sample1.y * this.visualScalingFactor
 
         if (this.drawStyle === 'quadratic') {
           const xMid = (x0 + x1) / 2
@@ -227,57 +234,57 @@ export class BloomFilterAudioVisualization extends HybridAudioVisualization {
       this.ctx.fillRect(0, 0, width, 4)
     }
 
-    // {
-    //   // draw a triangle
-    //   const p0 = {
-    //     x: width / 4,
-    //     y: (height * 3) / 4
-    //   }
+    {
+      // draw a triangle
+      const p0 = {
+        x: width / 4,
+        y: (height * 3) / 4
+      }
 
-    //   const p1 = {
-    //     x: (width * 3) / 4,
-    //     y: (height * 3) / 4
-    //   }
+      const p1 = {
+        x: (width * 3) / 4,
+        y: (height * 3) / 4
+      }
 
-    //   const p2 = {
-    //     x: width / 2,
-    //     y: (height * 1) / 4
-    //   }
+      const p2 = {
+        x: width / 2,
+        y: (height * 1) / 4
+      }
 
-    //   const scaleX = (p1.x - p0.x) / width
-    //   const scaleY = 1.0 / 20.0
-    //   const h = p0.y - p2.y
-    //   const w = p2.x - p0.x
-    //   const t0 = Math.atan2(h, w)
-    //   const h0 = Math.sqrt(w * w + h * h)
-    //   const hs = h0 / width
+      const scaleX = (p1.x - p0.x) / width
+      const scaleY = 0.15
+      const h = p0.y - p2.y
+      const w = p2.x - p0.x
+      const t0 = Math.atan2(h, w)
+      const h0 = Math.sqrt(w * w + h * h)
+      const hs = h0 / width
 
-    //   this.ctx.save()
-    //   this.ctx.translate(p0.x, p0.y)
-    //   this.ctx.scale(scaleX, scaleY)
-    //   drawSamples()
-    //   this.ctx.restore()
+      this.ctx.save()
+      this.ctx.translate(p0.x, p0.y)
+      this.ctx.scale(scaleX, scaleY)
+      drawSamples()
+      this.ctx.restore()
 
-    //   console.log(h0, width, hs)
-    //   this.ctx.save()
-    //   this.ctx.translate(p0.x, p0.y)
-    //   this.ctx.rotate(-t0)
-    //   this.ctx.scale(hs, -scaleY)
-    //   drawSamples()
-    //   this.ctx.restore()
+      // console.log(h0, width, hs)
+      this.ctx.save()
+      this.ctx.translate(p0.x, p0.y)
+      this.ctx.rotate(-t0)
+      this.ctx.scale(hs, -scaleY)
+      drawSamples()
+      this.ctx.restore()
 
-    //   this.ctx.save()
-    //   this.ctx.translate(p1.x, p1.y)
-    //   this.ctx.rotate(Math.PI + t0)
-    //   this.ctx.scale(hs, scaleY)
-    //   drawSamples()
-    //   this.ctx.restore()
-    // }
+      this.ctx.save()
+      this.ctx.translate(p1.x, p1.y)
+      this.ctx.rotate(Math.PI + t0)
+      this.ctx.scale(hs, scaleY)
+      drawSamples()
+      this.ctx.restore()
+    }
 
     // just draw normally
-    this.ctx.save()
-    drawSamples()
-    this.ctx.restore()
+    // this.ctx.save()
+    // drawSamples()
+    // this.ctx.restore()
 
     // tell webgl that the canvas texture needs updating
     this.offscreenCanvasMaterial.map!.needsUpdate = true

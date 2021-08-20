@@ -26,7 +26,8 @@ play?.addEventListener('click', () => {
     drawStyle: 'quadratic',
     fftSize: 256,
     smoothingFactor: 0.7,
-    accentuationFActor: 3.0
+    accentuationFactor: 3.0,
+    visualScalingFactor: 1.0
   })
 
   vis.start()
