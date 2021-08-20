@@ -23,6 +23,7 @@ const params = {
   drawStyle: 'curves' as DrawStyle,
   drawShape: 'triangle' as DrawShape,
   fftSize: 256,
+  numberOfBarkBands: 32,
   smoothingFactor: 0.7,
   accentuationFactor: 3.0,
   visualScalingFactor: 1.0
@@ -66,6 +67,11 @@ const fftC = gui.add(params, 'fftSize', 32, 4096).onFinishChange((value) => {
   }
   restart()
 })
+gui
+  .add(params, 'numberOfBarkBands', 4, 128)
+  .step(1.0)
+  .name('loudness bins')
+  .onFinishChange(restart)
 gui
   .add(params, 'smoothingFactor', 0.0, 1.0)
   .step(0.000001)
