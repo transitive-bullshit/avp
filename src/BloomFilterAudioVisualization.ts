@@ -113,6 +113,11 @@ export class BloomFilterAudioVisualization extends HybridAudioVisualization {
     this.meyda.start()
   }
 
+  pause() {
+    super.pause()
+    this.meyda.stop()
+  }
+
   stop() {
     super.stop()
     this.meyda.stop()

@@ -34,11 +34,10 @@ export abstract class AudioVisualization {
   audio: ThreeAudio
   analyser: ThreeAudioAnalyser
 
-  status: AnimationStatus
   protected _rafHandle: number | null
 
   constructor(opts: AudioVisualizationOptions) {
-    this.status = 'stopped'
+    console.log('AudioViz', opts)
     this._rafHandle = null
 
     if (!opts.canvas) {
@@ -91,6 +90,7 @@ export abstract class AudioVisualization {
   }
 
   dispose() {
+    this.stop()
     window.removeEventListener('resize', this._resize)
     this.audio.disconnect()
   }
@@ -99,16 +99,28 @@ export abstract class AudioVisualization {
     // TODO: override in subclass
   }
 
+  public get isPlaying() {
+    return this.audio.isPlaying
+  }
+
   public start() {
-    if (this.status === 'stopped') {
-      this.status = 'playing'
+    if (!this.isPlaying) {
+      this.audio.play()
       this._animate()
     }
   }
 
-  public stop() {
-    this.status = 'stopped'
+  public pause() {
+    this.audio.pause()
+    this._cancelAnimation()
+  }
 
+  public stop() {
+    this.audio.stop()
+    this._cancelAnimation()
+  }
+
+  protected _cancelAnimation() {
     if (this._rafHandle) {
       raf.cancel(this._rafHandle)
       this._rafHandle = null
@@ -116,11 +128,6 @@ export abstract class AudioVisualization {
   }
 
   protected _animate() {
-    if (this.status !== 'playing') {
-      this._rafHandle = null
-      return
-    }
-
     this._rafHandle = raf(this._animate.bind(this))
     this.render()
   }
