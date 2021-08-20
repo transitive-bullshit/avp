@@ -63,6 +63,7 @@ export abstract class AudioVisualization {
         })
       } else {
         const mediaElement = new Audio(this.mediaUrl)
+        this.mediaElement = mediaElement
         if (opts.autoplay) {
           mediaElement.play()
         }
@@ -85,16 +86,16 @@ export abstract class AudioVisualization {
     const fftSize = opts.fftSize || 1024
     this.analyser = new ThreeAudioAnalyser(this.audio, fftSize)
 
-    window.addEventListener('resize', this._resize)
+    window.addEventListener('resize', this._resize.bind(this))
   }
 
   dispose() {
     this.stop()
-    window.removeEventListener('resize', this._resize)
+    window.removeEventListener('resize', this._resize.bind(this))
     this.audio.disconnect()
   }
 
-  protected _resize = () => {
+  protected _resize() {
     // TODO: override in subclass
   }
 
@@ -104,17 +105,26 @@ export abstract class AudioVisualization {
 
   public start() {
     if (!this.isPlaying) {
+      if (this.mediaElement) {
+        this.mediaElement.play()
+      }
       this.audio.play()
       this._animate()
     }
   }
 
   public pause() {
+    if (this.mediaElement) {
+      this.mediaElement.pause()
+    }
     this.audio.pause()
     this._cancelAnimation()
   }
 
   public stop() {
+    if (this.mediaElement) {
+      this.mediaElement.pause()
+    }
     this.audio.stop()
     this._cancelAnimation()
   }

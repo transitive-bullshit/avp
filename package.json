@@ -19,6 +19,7 @@
     "posttest": "run-s build"
   },
   "dependencies": {
+    "dat.gui": "^0.7.7",
     "meyda": "^5.2.2",
     "raf": "^3.4.1",
     "random": "^3.0.2",
@@ -26,6 +27,7 @@
   },
   "devDependencies": {
     "@snowpack/plugin-typescript": "^1.2.1",
+    "@types/dat.gui": "^0.7.7",
     "@types/meyda": "^4.3.2",
     "@types/node": "^14.14.31",
     "@types/offscreencanvas": "^2019.6.2",

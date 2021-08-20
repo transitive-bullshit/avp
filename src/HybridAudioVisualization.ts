@@ -77,7 +77,7 @@ export class HybridAudioVisualization extends AudioVisualization {
     this.composer.addPass(new RenderPass(this.scene, this.camera))
   }
 
-  _resize = () => {
+  protected _resize() {
     super._resize()
 
     const { width, height } = this.canvas

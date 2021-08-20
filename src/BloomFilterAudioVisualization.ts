@@ -17,9 +17,9 @@ interface Sample {
   y: number
 }
 
-type DrawStyle = 'discrete' | 'linear' | 'quadratic'
+export type DrawStyle = 'discrete' | 'linear' | 'quadratic'
 
-type MeydaAudioFeature =
+export type MeydaAudioFeature =
   | 'amplitudeSpectrum'
   | 'buffer'
   | 'chroma'
@@ -74,7 +74,7 @@ export class BloomFilterAudioVisualization extends HybridAudioVisualization {
     )
     this.accentuationFactor = Math.max(
       1.0,
-      Math.min(128.0, opts.accentuationFactor ?? 2.0)
+      Math.min(16.0, opts.accentuationFactor ?? 2.0)
     )
     this.visualScalingFactor = Math.max(0.00001, opts.visualScalingFactor ?? 1)
 
@@ -132,9 +132,10 @@ export class BloomFilterAudioVisualization extends HybridAudioVisualization {
 
     // weight this frame's spectrum by its relative loudness compared to the
     // loudest frame we've seen so far
-    const rms = this.meyda.get('rms') as number
+    const rms = (this.meyda.get('rms') as number) || 0
     this.maxRMS = Math.max(this.maxRMS, rms)
-    const frameWeight = this.maxRMS <= 0 ? 1.0 : rms / this.maxRMS
+    const rmsNormalizationWeight = this.maxRMS <= 0 ? 1.0 : rms / this.maxRMS
+    // console.log(rms, rmsNormalizationWeight)
 
     const feature = this.featureExtractor
     const features = this.meyda.get([feature])
@@ -154,7 +155,7 @@ export class BloomFilterAudioVisualization extends HybridAudioVisualization {
     }
 
     if (this._samples?.length !== n) {
-      this._samples = new Array(n)
+      this._samples = []
       for (let i = 0; i < n; i++) {
         this._samples[i] = { x: 0, y: 0 }
       }
@@ -165,11 +166,19 @@ export class BloomFilterAudioVisualization extends HybridAudioVisualization {
     // normalize samples
     let maxS = 0
     let meanS = 0
+    // let minS = Number.POSITIVE_INFINITY
     for (let i = 0; i < n; ++i) {
-      maxS = Math.max(maxS, spectrum[i])
-      meanS += spectrum[i]
+      const value = spectrum[i]
+      maxS = Math.max(maxS, value)
+      // minS = Math.min(minS, value)
+      meanS += value
     }
+    if (maxS === 0) {
+      return
+    }
+
     meanS /= n
+    // console.log(minS, maxS, meanS)
     // const diff = maxS - meanS
 
     const w = this.smoothingFactor
@@ -180,6 +189,10 @@ export class BloomFilterAudioVisualization extends HybridAudioVisualization {
       // take the normalized sample value
       let value = sample / maxS
 
+      // if (feature === 'mfcc') {
+      //   value = (sample - minS) / (maxS - minS)
+      // }
+
       // cutoff any values that are less than the mean
       // let value = Math.max(0, (sample - meanS) / diff)
 
@@ -187,12 +200,11 @@ export class BloomFilterAudioVisualization extends HybridAudioVisualization {
       value = Math.max(0, Math.min(1, Math.pow(value, this.accentuationFactor)))
 
       const x = i * invN
-      const y = value * height * frameWeight
+      const y = value * rmsNormalizationWeight
 
-      this._samples[i] = {
-        x: this._samples[i].x * w + x * invW,
-        y: this._samples[i].y * w + y * invW
-      }
+      // console.log(this._samples[i].y, { w, y, invW })
+      this._samples[i].x = this._samples[i].x * w + x * invW
+      this._samples[i].y = this._samples[i].y * w + y * invW
     }
 
     // draw to the offscreen canvas via html5 2d canvas api
@@ -209,9 +221,9 @@ export class BloomFilterAudioVisualization extends HybridAudioVisualization {
         const sample0 = this._samples[i]
         const sample1 = this._samples[i + 1]
         const x0 = sample0.x
-        const y0 = sample0.y * this.visualScalingFactor
+        const y0 = sample0.y * this.visualScalingFactor * height
         const x1 = sample1.x
-        const y1 = sample1.y * this.visualScalingFactor
+        const y1 = sample1.y * this.visualScalingFactor * height
 
         if (this.drawStyle === 'quadratic') {
           const xMid = (x0 + x1) / 2
@@ -239,57 +251,57 @@ export class BloomFilterAudioVisualization extends HybridAudioVisualization {
       this.ctx.fillRect(0, 0, width, 4)
     }
 
-    {
-      // draw a triangle
-      const p0 = {
-        x: width / 4,
-        y: (height * 3) / 4
-      }
+    // {
+    //   // draw a triangle
+    //   const p0 = {
+    //     x: width / 4,
+    //     y: (height * 3) / 4
+    //   }
 
-      const p1 = {
-        x: (width * 3) / 4,
-        y: (height * 3) / 4
-      }
+    //   const p1 = {
+    //     x: (width * 3) / 4,
+    //     y: (height * 3) / 4
+    //   }
 
-      const p2 = {
-        x: width / 2,
-        y: (height * 1) / 4
-      }
+    //   const p2 = {
+    //     x: width / 2,
+    //     y: (height * 1) / 4
+    //   }
 
-      const scaleX = (p1.x - p0.x) / width
-      const scaleY = 0.15
-      const h = p0.y - p2.y
-      const w = p2.x - p0.x
-      const t0 = Math.atan2(h, w)
-      const h0 = Math.sqrt(w * w + h * h)
-      const hs = h0 / width
+    //   const scaleX = (p1.x - p0.x) / width
+    //   const scaleY = 0.15
+    //   const h = p0.y - p2.y
+    //   const w = p2.x - p0.x
+    //   const t0 = Math.atan2(h, w)
+    //   const h0 = Math.sqrt(w * w + h * h)
+    //   const hs = h0 / width
 
-      this.ctx.save()
-      this.ctx.translate(p0.x, p0.y)
-      this.ctx.scale(scaleX, scaleY)
-      drawSamples()
-      this.ctx.restore()
+    //   this.ctx.save()
+    //   this.ctx.translate(p0.x, p0.y)
+    //   this.ctx.scale(scaleX, scaleY)
+    //   drawSamples()
+    //   this.ctx.restore()
 
-      // console.log(h0, width, hs)
-      this.ctx.save()
-      this.ctx.translate(p0.x, p0.y)
-      this.ctx.rotate(-t0)
-      this.ctx.scale(hs, -scaleY)
-      drawSamples()
-      this.ctx.restore()
+    //   // console.log(h0, width, hs)
+    //   this.ctx.save()
+    //   this.ctx.translate(p0.x, p0.y)
+    //   this.ctx.rotate(-t0)
+    //   this.ctx.scale(hs, -scaleY)
+    //   drawSamples()
+    //   this.ctx.restore()
 
-      this.ctx.save()
-      this.ctx.translate(p1.x, p1.y)
-      this.ctx.rotate(Math.PI + t0)
-      this.ctx.scale(hs, scaleY)
-      drawSamples()
-      this.ctx.restore()
-    }
+    //   this.ctx.save()
+    //   this.ctx.translate(p1.x, p1.y)
+    //   this.ctx.rotate(Math.PI + t0)
+    //   this.ctx.scale(hs, scaleY)
+    //   drawSamples()
+    //   this.ctx.restore()
+    // }
 
     // just draw normally
-    // this.ctx.save()
-    // drawSamples()
-    // this.ctx.restore()
+    this.ctx.save()
+    drawSamples()
+    this.ctx.restore()
 
     // tell webgl that the canvas texture needs updating
     this.offscreenCanvasMaterial.map!.needsUpdate = true
