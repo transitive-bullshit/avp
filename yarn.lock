@@ -484,10 +484,10 @@
   resolved "https://registry.yarnpkg.com/@types/json5/-/json5-0.0.29.tgz#ee28707ae94e11d2b827bcbe5270bcea7f3e71ee"
   integrity sha1-7ihweulOEdK4J7y+UnC86n8+ce4=
 
-"@types/meyda@^4.3.1":
-  version "4.3.1"
-  resolved "https://registry.yarnpkg.com/@types/meyda/-/meyda-4.3.1.tgz#996367b198bbc9bdee007b2882874b56533e84eb"
-  integrity sha512-o68KTRNpz+7hUKalB/bp7iywc+gA12aC13SoGxW4+gCkaHOSVZJyKmBouERGoXJP3CqmiLaXi63ZaLfegXSqLQ==
+"@types/meyda@^4.3.2":
+  version "4.3.2"
+  resolved "https://registry.yarnpkg.com/@types/meyda/-/meyda-4.3.2.tgz#8af35267d092a2cca493d5a9c0d781719c6296fe"
+  integrity sha512-nCcSTz3+xOLRfVCbxMx1B/lCK8wOnRos4q6oIo08Bxim9JP29oQLeYcTARmzDj2IXyclZoxfehpYxOpTUF7/lQ==
 
 "@types/node@^14.14.31":
   version "14.14.31"
@@ -4817,15 +4817,15 @@ merge2@^1.3.0:
   resolved "https://registry.yarnpkg.com/merge2/-/merge2-1.4.1.tgz#4368892f885e907455a6fd7dc55c0c9d404990ae"
   integrity sha512-8q7VEgMJW4J8tcfVPy8g09NcQwZdbwFEqhe/WZkoIzjn/3TGDwtOCYtXGxA3O8tPzpczCCDgv+P2P5y00ZJOOg==
 
-meyda@^5.1.0:
-  version "5.1.0"
-  resolved "https://registry.yarnpkg.com/meyda/-/meyda-5.1.0.tgz#cca50009eebd5dd2ac5e13168016517e730e5c9e"
-  integrity sha512-hjf1O5vUXtqGJxidOVsmjfDchESSoCqrfkSnzIPEGdy0LMgH+Jeuczpk+bf+r83OKmtL+oOYkgfcr41dHwx6iQ==
+meyda@^5.2.2:
+  version "5.2.2"
+  resolved "https://registry.yarnpkg.com/meyda/-/meyda-5.2.2.tgz#8ea447b70542b01dc6a0f168fc9172adb7d779e5"
+  integrity sha512-yuS/whwD7JT8eTqM8eVxNRdAgs+FWjzrqjttg871FM3WJ3E1A/HlsmoLKobKYJUv9WB02pcmWnsn2/v/8OBOsA==
   dependencies:
     dct "0.1.0"
     fftjs "0.0.4"
     node-getopt "^0.3.2"
-    wav "^1.0.0"
+    wav "^1.0.2"
 
 micromatch@^3.1.10, micromatch@^3.1.4, micromatch@^3.1.5:
   version "3.1.10"
@@ -7331,7 +7331,7 @@ walker@^1.0.7, walker@~1.0.5:
   dependencies:
     makeerror "1.0.x"
 
-wav@^1.0.0:
+wav@^1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/wav/-/wav-1.0.2.tgz#bdbf3fa0d9b4519e9dfd2f603299ead0a2f22060"
   integrity sha512-viHtz3cDd/Tcr/HbNqzQCofKdF6kWUymH9LGDdskfWFoIy/HJ+RTihgjEcHfnsy1PO4e9B+y4HwgTwMrByquhg==

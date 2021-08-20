@@ -19,14 +19,14 @@
     "posttest": "run-s build"
   },
   "dependencies": {
-    "meyda": "^5.1.0",
+    "meyda": "^5.2.2",
     "raf": "^3.4.1",
     "random": "^3.0.2",
     "three": "^0.126.0"
   },
   "devDependencies": {
     "@snowpack/plugin-typescript": "^1.2.1",
-    "@types/meyda": "^4.3.1",
+    "@types/meyda": "^4.3.2",
     "@types/node": "^14.14.31",
     "@types/offscreencanvas": "^2019.6.2",
     "@types/raf": "^3.4.0",
