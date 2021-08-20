@@ -57,7 +57,7 @@ export interface BloomFilterVisualizationOptions
 export class BloomFilterAudioVisualization extends HybridAudioVisualization {
   meyda: Meyda.MeydaAnalyzer
   drawStyle: DrawStyle
-  drawShape: Drawhape
+  drawShape: DrawShape
   featureExtractor: MeydaAudioFeature
   maxRMS: number
   smoothingFactor: number
