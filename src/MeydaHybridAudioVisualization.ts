@@ -36,7 +36,7 @@ export type MeydaAudioFeature =
   | 'spectralSpread'
   | 'zcr'
 
-export interface BloomFilterVisualizationOptions
+export interface MeydaHybridVisualizationOptions
   extends HybridAudioVisualizationOptions {
   drawStyle?: DrawStyle
   drawShape?: DrawShape
@@ -52,7 +52,7 @@ export interface BloomFilterVisualizationOptions
   bloom?: boolean
 }
 
-export class BloomFilterAudioVisualization extends HybridAudioVisualization {
+export class MeydaHybridAudioVisualization extends HybridAudioVisualization {
   meyda: Meyda.MeydaAnalyzer
   drawStyle: DrawStyle
   drawShape: DrawShape
@@ -65,7 +65,7 @@ export class BloomFilterAudioVisualization extends HybridAudioVisualization {
   mirror: boolean
   _samples: number[] = []
 
-  constructor(opts: BloomFilterVisualizationOptions) {
+  constructor(opts: MeydaHybridVisualizationOptions) {
     super(opts)
 
     this.drawStyle = opts.drawStyle ?? 'bars'

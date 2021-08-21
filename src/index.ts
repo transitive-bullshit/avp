@@ -9,11 +9,11 @@ import audioUrl4 from '../audio/FortMinor-WheredYouGo.mp3'
 // import { CanvasAudioVisualization as AudioViz } from './CanvasAudioVisualization'
 // import { HybridAudioVisualization as AudioViz } from './HybridAudioVisualization'
 import {
-  BloomFilterAudioVisualization as AudioViz,
+  MeydaHybridAudioVisualization as AudioViz,
   DrawStyle,
   DrawShape,
   MeydaAudioFeature
-} from './BloomFilterAudioVisualization'
+} from './MeydaHybridAudioVisualization'
 
 const audioTracks: { [key: string]: string } = {
   'li jin': audioUrl0,
