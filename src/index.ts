@@ -37,6 +37,7 @@ const params = {
   accentuationFactor: 3.0,
   visualScalingFactor: 1.0,
   fill: true,
+  mirror: false,
   bloom: true
 }
 
@@ -125,6 +126,14 @@ gui
   .onChange((value) => {
     if (vis) {
       vis.fill = value
+    }
+  })
+gui
+  .add(params, 'mirror')
+  .name('mirror')
+  .onChange((value) => {
+    if (vis) {
+      vis.mirror = value
     }
   })
 gui.add(params, 'bloom').name('bloom').onChange(reset)

@@ -48,6 +48,7 @@ export interface BloomFilterVisualizationOptions
   hopSize?: number
   numberOfBarkBands?: number
   fill?: boolean
+  mirror?: boolean
   bloom?: boolean
 }
 
@@ -61,6 +62,7 @@ export class BloomFilterAudioVisualization extends HybridAudioVisualization {
   accentuationFactor: number
   visualScalingFactor: number
   fill: boolean
+  mirror: boolean
   _samples: number[] = []
 
   constructor(opts: BloomFilterVisualizationOptions) {
@@ -80,6 +82,7 @@ export class BloomFilterAudioVisualization extends HybridAudioVisualization {
     )
     this.visualScalingFactor = Math.max(0.00001, opts.visualScalingFactor ?? 1)
     this.fill = !!opts.fill
+    this.mirror = !!opts.mirror
 
     this.meyda = Meyda.createMeydaAnalyzer({
       audioContext: this.audio.context,
@@ -127,18 +130,30 @@ export class BloomFilterAudioVisualization extends HybridAudioVisualization {
   }
 
   protected render() {
-    const { width, height } = this.offscreenCanvas
+    // update sample values for each frame
+    this._update()
 
-    // we're relying on meyda for audio analysis
-    // this.analyser.getFrequencyData()
-    // const spectrum = this.analyser.data
+    // draw visualization to offscreen canvas
+    this._draw()
 
+    // render without post-processing
+    // this.renderer.render(this.scene, this.camera)
+
+    // render with post-processing
+    this.composer.render()
+  }
+
+  protected _update() {
     // weight this frame's spectrum by its relative loudness compared to the
     // loudest frame we've seen so far
     const rms = (this.meyda.get('rms') as number) || 0
     this.maxRMS = Math.max(this.maxRMS, rms)
     const rmsNormalizationWeight = this.maxRMS <= 0 ? 1.0 : rms / this.maxRMS
     // console.log(rms, rmsNormalizationWeight)
+
+    // we're relying on meyda for audio analysis
+    // this.analyser.getFrequencyData()
+    // const spectrum = this.analyser.data
 
     const feature = this.featureExtractor
     const features = this.meyda.get([feature])
@@ -157,6 +172,7 @@ export class BloomFilterAudioVisualization extends HybridAudioVisualization {
       return
     }
 
+    // lazily initialize initial samples
     if (this._samples?.length !== n) {
       this._samples = []
       for (let i = 0; i < n; i++) {
@@ -203,15 +219,15 @@ export class BloomFilterAudioVisualization extends HybridAudioVisualization {
       const y = value * rmsNormalizationWeight
       this._samples[i] = this._samples[i] * w + y * invW
     }
+  }
 
-    // draw to the offscreen canvas via html5 2d canvas api
-    this.ctx.clearRect(0, 0, width, height)
-    this.ctx.fillStyle = '#fff'
-    this.ctx.strokeStyle = '#fff'
-    this.ctx.lineWidth = 4
+  protected _draw() {
+    const n = this._samples.length
+    const { width, height } = this.offscreenCanvas
 
     const drawSamples = (
       samples: number[] = this._samples,
+      // coordinate transformation
       t: (x: number, y: number) => { x: number; y: number } = (x, y) => ({
         x: (x / (n - 1)) * width,
         y: y * this.visualScalingFactor * height
@@ -307,13 +323,19 @@ export class BloomFilterAudioVisualization extends HybridAudioVisualization {
       }
 
       // draw floor
-      if (this.fill && this.drawShape !== 'circle') {
+      if (this.fill) {
         const p0 = t(0, 0)
         const p1 = t(n - 1, 4 / (this.visualScalingFactor * height))
 
         this.ctx.fillRect(p0.x, p0.y, p1.x, p1.y)
       }
     }
+
+    // draw to the offscreen canvas via html5 2d canvas api
+    this.ctx.clearRect(0, 0, width, height)
+    this.ctx.fillStyle = '#fff'
+    this.ctx.strokeStyle = '#fff'
+    this.ctx.lineWidth = 4
 
     if (this.drawShape === 'basic') {
       // just draw normally
@@ -393,6 +415,7 @@ export class BloomFilterAudioVisualization extends HybridAudioVisualization {
       }
       drawSamples(this._samples.concat([this._samples[0]]), t0)
 
+      // TODO: move this pre and post stuff to drawSamples...
       if (this.drawStyle !== 'bars') {
         if (this.fill) {
           for (let i = 0; i < n; ++i) {
@@ -427,11 +450,5 @@ export class BloomFilterAudioVisualization extends HybridAudioVisualization {
 
     // tell webgl that the canvas texture needs updating
     this.offscreenCanvasMaterial.map!.needsUpdate = true
-
-    // render without post-processing
-    // this.renderer.render(this.scene, this.camera)
-
-    // render with post-processing
-    this.composer.render()
   }
 }
