@@ -4,9 +4,11 @@
 
 ## TODO
 
-- [ ] add stroke styles in addition to fill
-- [ ] add circle style
+- [x] add stroke styles in addition to fill
+- [x] add circle style
+- [x] add mirror option
 - [ ] add gif to readme
+- [ ] add basic docs
 - [ ] hosted demo
 - [ ] explore backgrounds, color palettes, and avatars
 - [ ] explore different post-processing effects
