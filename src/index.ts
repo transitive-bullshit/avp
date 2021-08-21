@@ -29,7 +29,7 @@ const params = {
   audioTrack: 'li jin',
   featureExtractor: 'loudness' as MeydaAudioFeature,
   drawStyle: 'curves' as DrawStyle,
-  drawShape: 'circle' as DrawShape,
+  drawShape: 'triangle' as DrawShape,
   offscreenScale: 2.0,
   fftSize: 256,
   numberOfBarkBands: 32,
@@ -37,7 +37,7 @@ const params = {
   accentuationFactor: 3.0,
   visualScalingFactor: 1.0,
   fill: true,
-  mirror: false,
+  mirror: true,
   bloom: true
 }
 

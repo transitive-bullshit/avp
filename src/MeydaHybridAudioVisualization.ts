@@ -359,6 +359,7 @@ export class MeydaHybridAudioVisualization extends HybridAudioVisualization {
           const p1 = t(1.0, 0) as any
 
           this.ctx.save()
+          this.ctx.beginPath()
           this.ctx.ellipse(
             0,
             0,
