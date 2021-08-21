@@ -52,6 +52,7 @@ export interface BloomFilterVisualizationOptions
   bufferSize?: number
   hopSize?: number
   numberOfBarkBands?: number
+  bloom?: boolean
 }
 
 export class BloomFilterAudioVisualization extends HybridAudioVisualization {
@@ -100,7 +101,7 @@ export class BloomFilterAudioVisualization extends HybridAudioVisualization {
     } as any)
 
     // setup any post-processing shader effects
-    {
+    if (opts.bloom !== false) {
       // @ts-ignore; TODO
       const effect1 = new UnrealBloomPass()
       this.composer.addPass(effect1)

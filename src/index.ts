@@ -35,7 +35,8 @@ const params = {
   numberOfBarkBands: 32,
   smoothingFactor: 0.7,
   accentuationFactor: 3.0,
-  visualScalingFactor: 1.0
+  visualScalingFactor: 1.0,
+  bloom: true
 }
 
 const gui = new dat.GUI({})
@@ -117,6 +118,7 @@ gui
       vis.visualScalingFactor = value
     }
   })
+gui.add(params, 'bloom').name('bloom').onChange(reset)
 
 function isPowerOf2(value: number): boolean {
   return (value & (value - 1)) === 0
