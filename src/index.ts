@@ -59,7 +59,7 @@ gui
   .onFinishChange(reset)
 gui
   .add(params, 'drawShape')
-  .options(['triangle', 'basic', 'circle'])
+  .options(['triangle', 'basic', 'circle', 'waveform'])
   .name('shape')
   .onChange((value) => {
     if (vis) {

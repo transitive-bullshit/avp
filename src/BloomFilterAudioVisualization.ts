@@ -18,7 +18,7 @@ interface Sample {
 }
 
 export type DrawStyle = 'bars' | 'lines' | 'curves'
-export type DrawShape = 'basic' | 'triangle' | 'circle'
+export type DrawShape = 'basic' | 'triangle' | 'circle' | 'waveform'
 
 export type MeydaAudioFeature =
   | 'amplitudeSpectrum'
@@ -255,7 +255,12 @@ export class BloomFilterAudioVisualization extends HybridAudioVisualization {
       this.ctx.fillRect(0, 0, width, 4)
     }
 
-    if (this.drawShape === 'triangle') {
+    if (this.drawShape === 'basic') {
+      // just draw normally
+      this.ctx.save()
+      drawSamples()
+      this.ctx.restore()
+    } else if (this.drawShape === 'triangle') {
       // draw a triangle
       const p0 = {
         x: width / 4,
@@ -300,11 +305,6 @@ export class BloomFilterAudioVisualization extends HybridAudioVisualization {
       this.ctx.scale(hs, scaleY)
       drawSamples()
       this.ctx.restore()
-    } else if (this.drawShape === 'basic') {
-      // just draw normally
-      this.ctx.save()
-      drawSamples()
-      this.ctx.restore()
     } else if (this.drawShape === 'circle') {
       const r = width / 4
       const f = 1.2
@@ -343,6 +343,7 @@ export class BloomFilterAudioVisualization extends HybridAudioVisualization {
         // console.log(theta0, theta1)
 
         if (this.drawStyle === 'curves') {
+          // TODO: circle + curves is
           const x0 = Math.cos(theta1) * d * f
           const y0 = Math.sin(theta1) * d * f
 
@@ -386,6 +387,18 @@ export class BloomFilterAudioVisualization extends HybridAudioVisualization {
         this.ctx.fill()
       }
 
+      this.ctx.restore()
+    } else if (this.drawShape === 'waveform') {
+      this.ctx.save()
+      this.ctx.translate(0, height / 2)
+      this.ctx.scale(1.0, 0.25)
+      drawSamples()
+      this.ctx.restore()
+
+      this.ctx.save()
+      this.ctx.translate(0, height / 2)
+      this.ctx.scale(1.0, -0.25)
+      drawSamples()
       this.ctx.restore()
     }
 
