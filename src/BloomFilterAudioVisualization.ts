@@ -18,7 +18,7 @@ interface Sample {
 }
 
 export type DrawStyle = 'bars' | 'lines' | 'curves'
-export type DrawShape = 'basic' | 'triangle'
+export type DrawShape = 'basic' | 'triangle' | 'circle'
 
 export type MeydaAudioFeature =
   | 'amplitudeSpectrum'
@@ -207,7 +207,6 @@ export class BloomFilterAudioVisualization extends HybridAudioVisualization {
       const x = i * invN
       const y = value * rmsNormalizationWeight
 
-      // console.log(this._samples[i].y, { w, y, invW })
       this._samples[i].x = this._samples[i].x * w + x * invW
       this._samples[i].y = this._samples[i].y * w + y * invW
     }
@@ -240,7 +239,7 @@ export class BloomFilterAudioVisualization extends HybridAudioVisualization {
           this.ctx.quadraticCurveTo(cpx1, y1, x1, y1)
         } else if (this.drawStyle === 'lines') {
           this.ctx.lineTo(x0, y0)
-        } else {
+        } else if (this.drawStyle === 'bars') {
           const yMid = (y0 + y1) / 2
           this.ctx.fillRect(x0, 0, (x1 - x0) / 2, yMid)
         }
@@ -305,6 +304,88 @@ export class BloomFilterAudioVisualization extends HybridAudioVisualization {
       // just draw normally
       this.ctx.save()
       drawSamples()
+      this.ctx.restore()
+    } else if (this.drawShape === 'circle') {
+      const r = width / 4
+      const f = 1.2
+
+      this.ctx.save()
+      this.ctx.translate(width / 2, height / 2)
+
+      this.ctx.strokeStyle = '#fff'
+      this.ctx.lineWidth = 2
+
+      this.ctx.beginPath()
+      this.ctx.ellipse(0, 0, r, r, 0, 0, 2 * Math.PI)
+      this.ctx.stroke()
+
+      this.ctx.lineWidth = 1
+
+      if (this.drawStyle !== 'bars') {
+        this.ctx.beginPath()
+        this.ctx.moveTo(r * f, 0)
+      }
+
+      for (let i = 0; i < n; ++i) {
+        const p0 = (n - i) / n
+        const p1 = (n - (i + 0.5)) / n
+        const theta0 = 2 * Math.PI * p1
+        const theta1 = 2 * Math.PI * p0
+        const v0 = this._samples[i].y * 100
+        const d = r + v0
+
+        // const x = Math.cos(theta) * (r + v0) * f
+        // const y = Math.sin(theta) * (r + v0) * f
+
+        // this.ctx.lineTo(x, y)
+
+        // this.ctx.ellipse(0, 0, d, d, 0, theta0, theta1)
+        // console.log(theta0, theta1)
+
+        if (this.drawStyle === 'curves') {
+          const x0 = Math.cos(theta1) * d * f
+          const y0 = Math.sin(theta1) * d * f
+
+          const x1 = Math.cos(theta0) * d * f
+          const y1 = Math.sin(theta0) * d * f
+
+          const xMid = (x0 + x1) / 2
+          const yMid = (y0 + y1) / 2
+          const cpx0 = (xMid + x0) / 2
+          const cpx1 = (xMid + x1) / 2
+
+          this.ctx.quadraticCurveTo(cpx0, y0, xMid, yMid)
+          this.ctx.quadraticCurveTo(cpx1, y1, x1, y1)
+        } else if (this.drawStyle === 'lines') {
+          this.ctx.lineTo(Math.cos(theta0) * d * f, Math.sin(theta0) * d * f)
+        } else if (this.drawStyle === 'bars') {
+          this.ctx.beginPath()
+          this.ctx.moveTo(Math.cos(theta0) * d, Math.sin(theta0) * d)
+          this.ctx.lineTo(Math.cos(theta0) * d * f, Math.sin(theta0) * d * f)
+          this.ctx.lineTo(Math.cos(theta1) * d * f, Math.sin(theta1) * d * f)
+          this.ctx.lineTo(Math.cos(theta1) * d, Math.sin(theta1) * d)
+          this.ctx.closePath()
+          this.ctx.fill()
+        }
+      }
+
+      if (this.drawStyle !== 'bars') {
+        this.ctx.lineTo(r * f, 0)
+        this.ctx.lineTo(r, 0)
+
+        for (let i = 0; i < n; ++i) {
+          const p0 = (i + 1) / n
+          const theta0 = 2 * Math.PI * p0
+
+          this.ctx.lineTo(Math.cos(theta0) * r, Math.sin(theta0) * r)
+        }
+
+        this.ctx.lineTo(r * f, 0)
+
+        this.ctx.closePath()
+        this.ctx.fill()
+      }
+
       this.ctx.restore()
     }
 

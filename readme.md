@@ -5,9 +5,11 @@
 ## TODO
 
 - [ ] add stroke styles in addition to fill
-- [ ] explore backgrounds, color palettes, and avatars
+- [ ] add circle style
 - [ ] add gif to readme
 - [ ] hosted demo
+- [ ] explore backgrounds, color palettes, and avatars
+- [ ] explore different post-processing effects
 
 ## License
 
