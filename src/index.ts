@@ -29,13 +29,14 @@ const params = {
   audioTrack: 'li jin',
   featureExtractor: 'loudness' as MeydaAudioFeature,
   drawStyle: 'curves' as DrawStyle,
-  drawShape: 'triangle' as DrawShape,
+  drawShape: 'circle' as DrawShape,
   offscreenScale: 2.0,
   fftSize: 256,
   numberOfBarkBands: 32,
   smoothingFactor: 0.7,
   accentuationFactor: 3.0,
   visualScalingFactor: 1.0,
+  fill: true,
   bloom: true
 }
 
@@ -116,6 +117,14 @@ gui
   .onChange((value) => {
     if (vis) {
       vis.visualScalingFactor = value
+    }
+  })
+gui
+  .add(params, 'fill')
+  .name('fill')
+  .onChange((value) => {
+    if (vis) {
+      vis.fill = value
     }
   })
 gui.add(params, 'bloom').name('bloom').onChange(reset)

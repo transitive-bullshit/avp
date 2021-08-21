@@ -12,11 +12,6 @@ import {
   HybridAudioVisualizationOptions
 } from './HybridAudioVisualization'
 
-interface Sample {
-  x: number
-  y: number
-}
-
 export type DrawStyle = 'bars' | 'lines' | 'curves'
 export type DrawShape = 'basic' | 'triangle' | 'circle' | 'waveform'
 
@@ -52,6 +47,7 @@ export interface BloomFilterVisualizationOptions
   bufferSize?: number
   hopSize?: number
   numberOfBarkBands?: number
+  fill?: boolean
   bloom?: boolean
 }
 
@@ -64,7 +60,8 @@ export class BloomFilterAudioVisualization extends HybridAudioVisualization {
   smoothingFactor: number
   accentuationFactor: number
   visualScalingFactor: number
-  _samples: Sample[] = []
+  fill: boolean
+  _samples: number[] = []
 
   constructor(opts: BloomFilterVisualizationOptions) {
     super(opts)
@@ -82,6 +79,7 @@ export class BloomFilterAudioVisualization extends HybridAudioVisualization {
       Math.min(16.0, opts.accentuationFactor ?? 2.0)
     )
     this.visualScalingFactor = Math.max(0.00001, opts.visualScalingFactor ?? 1)
+    this.fill = !!opts.fill
 
     this.meyda = Meyda.createMeydaAnalyzer({
       audioContext: this.audio.context,
@@ -162,11 +160,9 @@ export class BloomFilterAudioVisualization extends HybridAudioVisualization {
     if (this._samples?.length !== n) {
       this._samples = []
       for (let i = 0; i < n; i++) {
-        this._samples[i] = { x: 0, y: 0 }
+        this._samples[i] = 0
       }
     }
-
-    const invN = width / (n - 1)
 
     // normalize samples
     let maxS = 0
@@ -204,30 +200,43 @@ export class BloomFilterAudioVisualization extends HybridAudioVisualization {
       // accentuate differences in the signal
       value = Math.max(0, Math.min(1, Math.pow(value, this.accentuationFactor)))
 
-      const x = i * invN
       const y = value * rmsNormalizationWeight
-
-      this._samples[i].x = this._samples[i].x * w + x * invW
-      this._samples[i].y = this._samples[i].y * w + y * invW
+      this._samples[i] = this._samples[i] * w + y * invW
     }
 
     // draw to the offscreen canvas via html5 2d canvas api
     this.ctx.clearRect(0, 0, width, height)
     this.ctx.fillStyle = '#fff'
+    this.ctx.strokeStyle = '#fff'
+    this.ctx.lineWidth = 4
 
-    const drawSamples = () => {
+    const drawSamples = (
+      samples: number[] = this._samples,
+      t: (x: number, y: number) => { x: number; y: number } = (x, y) => ({
+        x: (x / (n - 1)) * width,
+        y: y * this.visualScalingFactor * height
+      })
+    ) => {
+      const n = samples.length
       if (this.drawStyle !== 'bars') {
-        this.ctx.beginPath()
-        this.ctx.moveTo(0, 0)
+        if (this.drawShape === 'circle') {
+          this.ctx.beginPath()
+          const p = t(0, samples[0])
+          this.ctx.moveTo(p.x, p.y)
+        } else {
+          this.ctx.beginPath()
+          const p = t(0, 0)
+          this.ctx.moveTo(p.x, p.y)
+        }
       }
 
       for (let i = 0; i < n - 1; ++i) {
-        const sample0 = this._samples[i]
-        const sample1 = this._samples[i + 1]
-        const x0 = sample0.x
-        const y0 = sample0.y * this.visualScalingFactor * height
-        const x1 = sample1.x
-        const y1 = sample1.y * this.visualScalingFactor * height
+        const sample0 = samples[i]
+        const sample1 = samples[i + 1]
+        const x0 = i
+        const y0 = sample0
+        const x1 = i + 1
+        const y1 = sample1
 
         if (this.drawStyle === 'curves') {
           const xMid = (x0 + x1) / 2
@@ -235,24 +244,75 @@ export class BloomFilterAudioVisualization extends HybridAudioVisualization {
           const cpx0 = (xMid + x0) / 2
           const cpx1 = (xMid + x1) / 2
 
-          this.ctx.quadraticCurveTo(cpx0, y0, xMid, yMid)
-          this.ctx.quadraticCurveTo(cpx1, y1, x1, y1)
+          const cp0 = t(cpx0, y0)
+          const cp1 = t(xMid, yMid)
+          const cp2 = t(cpx1, y1)
+          const cp3 = t(x1, y1)
+          this.ctx.quadraticCurveTo(cp0.x, cp0.y, cp1.x, cp1.y)
+          this.ctx.quadraticCurveTo(cp2.x, cp2.y, cp3.x, cp3.y)
         } else if (this.drawStyle === 'lines') {
-          this.ctx.lineTo(x0, y0)
+          const p0 = t(x0, y0)
+          this.ctx.lineTo(p0.x, p0.y)
         } else if (this.drawStyle === 'bars') {
           const yMid = (y0 + y1) / 2
-          this.ctx.fillRect(x0, 0, (x1 - x0) / 2, yMid)
+
+          if (this.fill) {
+            const p0 = t(x0, 0)
+            const p1 = t((x1 - x0) / 2, yMid)
+
+            if (this.drawShape === 'circle') {
+              const xMid = (x0 + x1) / 2
+
+              const p0 = t(x0, 0)
+              const p1 = t(x0, yMid)
+              const p2 = t(xMid, yMid)
+              const p3 = t(xMid, 0)
+
+              this.ctx.beginPath()
+              this.ctx.moveTo(p0.x, p0.y)
+              this.ctx.lineTo(p1.x, p1.y)
+              this.ctx.lineTo(p2.x, p2.y)
+              this.ctx.lineTo(p3.x, p3.y)
+              this.ctx.closePath()
+              this.ctx.fill()
+            } else {
+              this.ctx.fillRect(p0.x, p0.y, p1.x, p1.y)
+            }
+          } else {
+            const p0 = t(x0, 0)
+            const p1 = t(x0, y0)
+
+            this.ctx.beginPath()
+            this.ctx.moveTo(p0.x, p0.y)
+            this.ctx.lineTo(p1.x, p1.y)
+            this.ctx.stroke()
+          }
         }
       }
 
+      if (this.drawShape === 'circle') {
+        return
+      }
+
       if (this.drawStyle !== 'bars') {
-        this.ctx.lineTo(this._samples[n - 1].x, 0)
-        this.ctx.closePath()
-        this.ctx.fill()
+        const p0 = t(n - 1, 0)
+        this.ctx.lineTo(p0.x, p0.y)
+
+        if (this.fill) {
+          this.ctx.closePath()
+          this.ctx.fill()
+        } else {
+          this.ctx.stroke()
+        }
       }
 
       // draw floor
-      this.ctx.fillRect(0, 0, width, 4)
+      if (this.fill && this.drawShape !== 'circle') {
+        const p0 = t(0, 0)
+        const p1 = t(n - 1, 4 / (this.visualScalingFactor * height))
+
+        this.ctx.fillRect(p0.x, p0.y, p1.x, p1.y)
+      }
     }
 
     if (this.drawShape === 'basic') {
@@ -307,84 +367,47 @@ export class BloomFilterAudioVisualization extends HybridAudioVisualization {
       this.ctx.restore()
     } else if (this.drawShape === 'circle') {
       const r = width / 4
-      const f = 1.2
+      const f = (width / 8) * this.visualScalingFactor
+
+      if (this.fill) {
+        this.ctx.save()
+        this.ctx.translate(width / 2, height / 2)
+        this.ctx.strokeStyle = '#fff'
+        this.ctx.lineWidth = 2
+        this.ctx.beginPath()
+        this.ctx.ellipse(0, 0, r, r, 0, 0, 2 * Math.PI)
+        this.ctx.stroke()
+        this.ctx.restore()
+      }
 
       this.ctx.save()
       this.ctx.translate(width / 2, height / 2)
+      const t0 = (i: number, d: number) => {
+        const theta = (i / n) * 2 * Math.PI
+        const dist = r + d * f
 
-      this.ctx.strokeStyle = '#fff'
-      this.ctx.lineWidth = 2
-
-      this.ctx.beginPath()
-      this.ctx.ellipse(0, 0, r, r, 0, 0, 2 * Math.PI)
-      this.ctx.stroke()
-
-      this.ctx.lineWidth = 1
+        return {
+          x: Math.cos(theta) * dist,
+          y: Math.sin(theta) * dist
+        }
+      }
+      drawSamples(this._samples.concat([this._samples[0]]), t0)
 
       if (this.drawStyle !== 'bars') {
-        this.ctx.beginPath()
-        this.ctx.moveTo(r * f, 0)
-      }
+        if (this.fill) {
+          for (let i = 0; i < n; ++i) {
+            const p0 = t0(n - i - 1, 0)
 
-      for (let i = 0; i < n; ++i) {
-        const p0 = (n - i) / n
-        const p1 = (n - (i + 0.5)) / n
-        const theta0 = 2 * Math.PI * p1
-        const theta1 = 2 * Math.PI * p0
-        const v0 = this._samples[i].y * 100
-        const d = r + v0
+            this.ctx.lineTo(p0.x, p0.y)
+          }
 
-        // const x = Math.cos(theta) * (r + v0) * f
-        // const y = Math.sin(theta) * (r + v0) * f
-
-        // this.ctx.lineTo(x, y)
-
-        // this.ctx.ellipse(0, 0, d, d, 0, theta0, theta1)
-        // console.log(theta0, theta1)
-
-        if (this.drawStyle === 'curves') {
-          // TODO: circle + curves is
-          const x0 = Math.cos(theta1) * d * f
-          const y0 = Math.sin(theta1) * d * f
-
-          const x1 = Math.cos(theta0) * d * f
-          const y1 = Math.sin(theta0) * d * f
-
-          const xMid = (x0 + x1) / 2
-          const yMid = (y0 + y1) / 2
-          const cpx0 = (xMid + x0) / 2
-          const cpx1 = (xMid + x1) / 2
-
-          this.ctx.quadraticCurveTo(cpx0, y0, xMid, yMid)
-          this.ctx.quadraticCurveTo(cpx1, y1, x1, y1)
-        } else if (this.drawStyle === 'lines') {
-          this.ctx.lineTo(Math.cos(theta0) * d * f, Math.sin(theta0) * d * f)
-        } else if (this.drawStyle === 'bars') {
-          this.ctx.beginPath()
-          this.ctx.moveTo(Math.cos(theta0) * d, Math.sin(theta0) * d)
-          this.ctx.lineTo(Math.cos(theta0) * d * f, Math.sin(theta0) * d * f)
-          this.ctx.lineTo(Math.cos(theta1) * d * f, Math.sin(theta1) * d * f)
-          this.ctx.lineTo(Math.cos(theta1) * d, Math.sin(theta1) * d)
           this.ctx.closePath()
           this.ctx.fill()
+        } else {
+          const p0 = t0(n, this._samples[0])
+          this.ctx.lineTo(p0.x, p0.y)
+          this.ctx.stroke()
         }
-      }
-
-      if (this.drawStyle !== 'bars') {
-        this.ctx.lineTo(r * f, 0)
-        this.ctx.lineTo(r, 0)
-
-        for (let i = 0; i < n; ++i) {
-          const p0 = (i + 1) / n
-          const theta0 = 2 * Math.PI * p0
-
-          this.ctx.lineTo(Math.cos(theta0) * r, Math.sin(theta0) * r)
-        }
-
-        this.ctx.lineTo(r * f, 0)
-
-        this.ctx.closePath()
-        this.ctx.fill()
       }
 
       this.ctx.restore()
