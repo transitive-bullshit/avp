@@ -223,17 +223,47 @@ export class MeydaHybridAudioVisualization extends HybridAudioVisualization {
 
   protected _draw() {
     const n = this._samples.length
+    const n0 = n
     const { width, height } = this.offscreenCanvas
 
     const drawSamples = (
       samples: number[] = this._samples,
       // coordinate transformation
       t: (x: number, y: number) => { x: number; y: number } = (x, y) => ({
-        x: (x / (n - 1)) * width,
+        x: x * width,
         y: y * this.visualScalingFactor * height
-      })
+      }),
+      mirrored = false
     ) => {
+      // TODO: do we want to override n here for circles?
       const n = samples.length
+      const invN = 1.0 / (n - 1)
+
+      if (this.mirror && !mirrored) {
+        if (this.drawShape === 'circle') {
+          this.ctx.save()
+          drawSamples(samples, (x, y) => t(x / 2, y), true)
+          this.ctx.restore()
+
+          this.ctx.save()
+          drawSamples(samples, (x, y) => t(n - x / 2 - 1, y), true)
+          this.ctx.restore()
+        } else {
+          this.ctx.save()
+          this.ctx.translate(0, 0)
+          this.ctx.scale(0.5, 1)
+          drawSamples(samples, t, true)
+          this.ctx.restore()
+
+          this.ctx.save()
+          this.ctx.translate(width, 0)
+          this.ctx.scale(-0.5, 1)
+          drawSamples(samples, t, true)
+          this.ctx.restore()
+        }
+        return
+      }
+
       if (this.drawStyle !== 'bars') {
         if (this.drawShape === 'circle') {
           this.ctx.beginPath()
@@ -247,12 +277,10 @@ export class MeydaHybridAudioVisualization extends HybridAudioVisualization {
       }
 
       for (let i = 0; i < n - 1; ++i) {
-        const sample0 = samples[i]
-        const sample1 = samples[i + 1]
-        const x0 = i
-        const y0 = sample0
-        const x1 = i + 1
-        const y1 = sample1
+        const x0 = i * invN
+        const y0 = samples[i]
+        const x1 = (i + 1) * invN
+        const y1 = samples[i + 1]
 
         if (this.drawStyle === 'curves') {
           const xMid = (x0 + x1) / 2
@@ -307,27 +335,62 @@ export class MeydaHybridAudioVisualization extends HybridAudioVisualization {
       }
 
       if (this.drawShape === 'circle') {
-        return
-      }
+        if (this.drawStyle !== 'bars') {
+          if (this.fill) {
+            const k = 256
+            for (let i = 0; i < k; ++i) {
+              const p0 = t((k - i) / (k - 1), 0)
 
-      if (this.drawStyle !== 'bars') {
-        const p0 = t(n - 1, 0)
-        this.ctx.lineTo(p0.x, p0.y)
+              this.ctx.lineTo(p0.x, p0.y)
+            }
 
-        if (this.fill) {
-          this.ctx.closePath()
-          this.ctx.fill()
-        } else {
-          this.ctx.stroke()
+            this.ctx.closePath()
+            this.ctx.fill()
+          } else {
+            const p0 = t(1.0, this._samples[0])
+            this.ctx.lineTo(p0.x, p0.y)
+            this.ctx.stroke()
+          }
         }
-      }
 
-      // draw floor
-      if (this.fill) {
-        const p0 = t(0, 0)
-        const p1 = t(n - 1, 4 / (this.visualScalingFactor * height))
+        // draw floor
+        if (this.fill) {
+          const p0 = t(0, 0) as any
+          const p1 = t(1.0, 0) as any
 
-        this.ctx.fillRect(p0.x, p0.y, p1.x, p1.y)
+          this.ctx.save()
+          this.ctx.ellipse(
+            0,
+            0,
+            p0.r,
+            p0.r,
+            0,
+            Math.min(p0.theta, p1.theta),
+            Math.max(p0.theta, p1.theta)
+          )
+          this.ctx.stroke()
+          this.ctx.restore()
+        }
+      } else {
+        if (this.drawStyle !== 'bars') {
+          const p0 = t(1.0, 0)
+          this.ctx.lineTo(p0.x, p0.y)
+
+          if (this.fill) {
+            this.ctx.closePath()
+            this.ctx.fill()
+          } else {
+            this.ctx.stroke()
+          }
+        }
+
+        // draw floor
+        if (this.fill) {
+          const p0 = t(0, 0)
+          const p1 = t(1.0, 4 / (this.visualScalingFactor * height))
+
+          this.ctx.fillRect(p0.x, p0.y, p1.x, p1.y)
+        }
       }
     }
 
@@ -391,48 +454,34 @@ export class MeydaHybridAudioVisualization extends HybridAudioVisualization {
       const r = width / 4
       const f = (width / 8) * this.visualScalingFactor
 
-      if (this.fill) {
-        this.ctx.save()
-        this.ctx.translate(width / 2, height / 2)
-        this.ctx.strokeStyle = '#fff'
-        this.ctx.lineWidth = 2
-        this.ctx.beginPath()
-        this.ctx.ellipse(0, 0, r, r, 0, 0, 2 * Math.PI)
-        this.ctx.stroke()
-        this.ctx.restore()
-      }
+      // if (this.fill) {
+      //   this.ctx.save()
+      //   this.ctx.translate(width / 2, height / 2)
+      //   this.ctx.strokeStyle = '#fff'
+      //   this.ctx.lineWidth = 2
+      //   this.ctx.beginPath()
+      //   this.ctx.ellipse(0, 0, r, r, 0, 0, 2 * Math.PI)
+      //   this.ctx.stroke()
+      //   this.ctx.restore()
+      // }
 
       this.ctx.save()
       this.ctx.translate(width / 2, height / 2)
-      const t0 = (i: number, d: number) => {
-        const theta = (i / n) * 2 * Math.PI
-        const dist = r + d * f
+      drawSamples(
+        this._samples.concat([this._samples[0]]),
+        (x: number, d: number) => {
+          const theta = x * 2 * Math.PI
+          const dist = r + d * f
 
-        return {
-          x: Math.cos(theta) * dist,
-          y: Math.sin(theta) * dist
-        }
-      }
-      drawSamples(this._samples.concat([this._samples[0]]), t0)
-
-      // TODO: move this pre and post stuff to drawSamples...
-      if (this.drawStyle !== 'bars') {
-        if (this.fill) {
-          for (let i = 0; i < n; ++i) {
-            const p0 = t0(n - i - 1, 0)
-
-            this.ctx.lineTo(p0.x, p0.y)
+          return {
+            theta,
+            r,
+            dist,
+            x: Math.cos(theta) * dist,
+            y: Math.sin(theta) * dist
           }
-
-          this.ctx.closePath()
-          this.ctx.fill()
-        } else {
-          const p0 = t0(n, this._samples[0])
-          this.ctx.lineTo(p0.x, p0.y)
-          this.ctx.stroke()
         }
-      }
-
+      )
       this.ctx.restore()
     } else if (this.drawShape === 'waveform') {
       this.ctx.save()
