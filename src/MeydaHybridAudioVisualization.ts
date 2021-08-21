@@ -88,17 +88,11 @@ export class MeydaHybridAudioVisualization extends HybridAudioVisualization {
       audioContext: this.audio.context,
       source: this.analyser.analyser,
       bufferSize: opts.bufferSize ?? 1024,
-      // smaller => smoother but more computation
+      // smaller => slightly smoother but more computation
       hopSize: opts.hopSize ?? 512,
       featureExtractors: [this.featureExtractor].concat(['rms']),
       numberOfBarkBands: opts.numberOfBarkBands ?? 32
       // numberOfMFCCCoefficients: 128
-      // sampleRate: 100
-      // 'powerSpectrum',
-      // 'spectralCentroid',
-      // 'chroma',
-      // 'mfcc'
-      // 'loudness'
     } as any)
 
     // setup any post-processing shader effects

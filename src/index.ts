@@ -31,7 +31,8 @@ const params = {
   drawStyle: 'curves' as DrawStyle,
   drawShape: 'triangle' as DrawShape,
   offscreenScale: 2.0,
-  fftSize: 256,
+  fftSizePower: 8,
+  bufferSizePower: 10,
   numberOfBarkBands: 32,
   smoothingFactor: 0.7,
   accentuationFactor: 3.0,
@@ -82,12 +83,16 @@ gui
   .step(1.0)
   .name('offscreen')
   .onFinishChange(reset)
-const fftC = gui.add(params, 'fftSize', 32, 4096).onFinishChange((value) => {
-  if (!isPowerOf2(value)) {
-    fftC.setValue(nextPowerOf2(value))
-  }
-  reset()
-})
+gui
+  .add(params, 'fftSizePower', 5, 12)
+  .step(1)
+  .name('fft size (log)')
+  .onFinishChange(reset)
+gui
+  .add(params, 'bufferSizePower', 9, 12)
+  .step(1)
+  .name('buffer size (log)')
+  .onFinishChange(reset)
 gui
   .add(params, 'numberOfBarkBands', 4, 128)
   .step(1.0)
@@ -138,14 +143,6 @@ gui
   })
 gui.add(params, 'bloom').name('bloom').onChange(reset)
 
-function isPowerOf2(value: number): boolean {
-  return (value & (value - 1)) === 0
-}
-
-function nextPowerOf2(value: number): number {
-  return Math.pow(2, Math.ceil(Math.log2(value)))
-}
-
 function reset() {
   if (!vis) {
     return
@@ -168,7 +165,9 @@ function restart() {
     canvas,
     autoplay: false,
     ...params,
-    mediaUrl: audioTracks[params.audioTrack]
+    mediaUrl: audioTracks[params.audioTrack],
+    fftSize: 1 << params.fftSizePower,
+    bufferSize: 1 << params.bufferSizePower
   })
 
   vis.start()
