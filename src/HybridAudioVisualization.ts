@@ -55,22 +55,36 @@ export class HybridAudioVisualization extends AudioVisualization {
 
     this.renderer = new WebGLRenderer({
       antialias: true,
-      canvas: this.canvas
+      canvas: this.canvas,
+      alpha: true
     })
     this.renderer.setSize(this.canvas.width, this.canvas.height)
-    this.renderer.setClearColor(0x000000)
+    this.renderer.setClearColor(0x000000, 0.0)
     this.renderer.setPixelRatio(window.devicePixelRatio)
 
     this.scene = new Scene()
     this.camera = new Camera()
 
-    this.offscreenCanvasMaterial = new MeshBasicMaterial()
-    this.offscreenCanvasMaterial.map = new CanvasTexture(this.offscreenCanvas)
+    // {
+    //   const material = new MeshBasicMaterial()
+    //   const t = new TextureLoader().load('/bg0.jpg')
+    //   material.map = t
 
-    const geometry = new PlaneGeometry(2, 2)
-    const mesh = new Mesh(geometry, this.offscreenCanvasMaterial)
-    mesh.scale.setY(-1)
-    this.scene.add(mesh)
+    //   const geometry = new PlaneGeometry(2, 2)
+    //   const mesh = new Mesh(geometry, material)
+    //   // mesh.scale.setY(-1)
+    //   this.scene.add(mesh)
+    // }
+
+    {
+      this.offscreenCanvasMaterial = new MeshBasicMaterial()
+      this.offscreenCanvasMaterial.map = new CanvasTexture(this.offscreenCanvas)
+
+      const geometry = new PlaneGeometry(2, 2)
+      const mesh = new Mesh(geometry, this.offscreenCanvasMaterial)
+      mesh.scale.setY(-1)
+      this.scene.add(mesh)
+    }
 
     this.composer = new EffectComposer(this.renderer)
     this.composer.setSize(this.canvas.width, this.canvas.height)
@@ -82,8 +96,8 @@ export class HybridAudioVisualization extends AudioVisualization {
 
     const { width, height } = this.canvas
 
-    this.offscreenCanvas.width = width * this.offscreenScale
-    this.offscreenCanvas.height = height * this.offscreenScale
+    this.offscreenCanvas.width = (width * this.offscreenScale) | 0
+    this.offscreenCanvas.height = (height * this.offscreenScale) | 0
 
     this.renderer.setSize(width, height)
     this.composer.setSize(width, height)

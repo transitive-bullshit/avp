@@ -39,7 +39,8 @@ const params = {
   visualScalingFactor: 1.0,
   fill: true,
   mirror: true,
-  bloom: true
+  bloom: true,
+  glitch: false
 }
 
 const gui = new dat.GUI({})
@@ -141,7 +142,22 @@ gui
       vis.mirror = value
     }
   })
-gui.add(params, 'bloom').name('bloom').onChange(reset)
+gui
+  .add(params, 'bloom')
+  .name('bloom')
+  .onChange((value) => {
+    if (vis) {
+      vis.bloom = value
+    }
+  })
+gui
+  .add(params, 'glitch')
+  .name('glitch')
+  .onChange((value) => {
+    if (vis) {
+      vis.glitch = value
+    }
+  })
 
 function reset() {
   if (!vis) {

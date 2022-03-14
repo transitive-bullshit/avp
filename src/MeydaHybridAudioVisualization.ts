@@ -2,8 +2,12 @@
 /* eslint-disable prefer-const */
 /* eslint-disable no-unused-vars */
 
-import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass'
+// import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass'
+import { UnrealBloomPass } from './TransparentBackgroundFixedUnrealBloomPass'
+// import { BloomPass } from 'three/examples/jsm/postprocessing/BloomPass'
 // import { AfterimagePass } from 'three/examples/jsm/postprocessing/AfterimagePass'
+// import { FilmPass } from 'three/examples/jsm/postprocessing/FilmPass'
+import { GlitchPass } from 'three/examples/jsm/postprocessing/GlitchPass'
 
 import Meyda from 'meyda'
 
@@ -50,6 +54,7 @@ export interface MeydaHybridVisualizationOptions
   fill?: boolean
   mirror?: boolean
   bloom?: boolean
+  glitch?: boolean
 }
 
 export class MeydaHybridAudioVisualization extends HybridAudioVisualization {
@@ -64,6 +69,11 @@ export class MeydaHybridAudioVisualization extends HybridAudioVisualization {
   fill: boolean
   mirror: boolean
   _samples: number[] = []
+
+  _bloom = false
+  _glitch = false
+  _bloomPass: UnrealBloomPass
+  _glitchPass: GlitchPass
 
   constructor(opts: MeydaHybridVisualizationOptions) {
     super(opts)
@@ -95,17 +105,58 @@ export class MeydaHybridAudioVisualization extends HybridAudioVisualization {
       // numberOfMFCCCoefficients: 128
     } as any)
 
-    // setup any post-processing shader effects
-    if (opts.bloom !== false) {
-      // @ts-ignore; TODO
-      const effect1 = new UnrealBloomPass()
-      this.composer.addPass(effect1)
-    }
+    // setup post-processing shader effects
+    // @ts-ignore; TODO
+    // this._bloomPass = new UnrealBloomPass({ x: 256, y: 256 }, 1.0, 0.1) // defaults
+    this._bloomPass = new UnrealBloomPass({ x: 256, y: 256 }, 1.0, 0.1)
+
+    // TODO: maybe make glitches respond to audio signal peaks?
+    this._glitchPass = new GlitchPass()
+
+    this.bloom = opts.bloom !== false
+    this.glitch = !!opts.glitch
+
+    // {
+    //   const effect1 = new FilmPass(10, 2, 2048)
+    //   this.composer.addPass(effect1)
+    // }
 
     // {
     //   const effect1 = new AfterimagePass()
     //   this.composer.addPass(effect1)
     // }
+  }
+
+  get bloom(): boolean {
+    return this._bloom
+  }
+
+  set bloom(value: boolean) {
+    if (!!value !== this._bloom) {
+      this._bloom = !!value
+
+      if (this._bloom) {
+        this.composer.insertPass(this._bloomPass, 1)
+      } else {
+        this.composer.removePass(this._bloomPass)
+      }
+    }
+  }
+
+  get glitch(): boolean {
+    return this._glitch
+  }
+
+  set glitch(value: boolean) {
+    if (!!value !== this._glitch) {
+      this._glitch = !!value
+
+      if (this._glitch) {
+        this.composer.insertPass(this._glitchPass, this.composer.passes.length)
+      } else {
+        this.composer.removePass(this._glitchPass)
+      }
+    }
   }
 
   start() {

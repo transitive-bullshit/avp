@@ -13,6 +13,11 @@
 - [ ] explore backgrounds, color palettes, and avatars
 - [ ] explore different post-processing effects
 
+## Inspiration
+
+- https://www.youtube.com/watch?v=QykkWNOtap4
+- https://www.youtube.com/watch?v=Q1bxyKOZ5RI
+
 ## License
 
 MIT © [Travis Fischer](https://transitivebullsh.it)
