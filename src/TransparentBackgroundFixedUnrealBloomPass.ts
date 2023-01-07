@@ -1,3 +1,5 @@
+/* eslint-disable dot-notation */
+
 import {
   AdditiveBlending,
   Color,
@@ -23,7 +25,8 @@ import { CopyShader } from 'three/examples/jsm/shaders/CopyShader.js'
 import { LuminosityHighPassShader } from 'three/examples/jsm/shaders/LuminosityHighPassShader.js'
 
 /**
- * Thanks to https://github.com/mrdoob/three.js/issues/14104#issuecomment-429664412 for this fragmentShaderfix
+ * Thanks to https://github.com/mrdoob/three.js/issues/14104#issuecomment-429664412
+ * for this fragment shader fix.
  *
  * UnrealBloomPass is inspired by the bloom pass of Unreal Engine. It creates a
  * mip map chain of bloom textures and blurs them with different radii. Because
@@ -152,21 +155,16 @@ class TransparentBackgroundFixedUnrealBloomPass extends Pass {
 
     // Composite material
     this.compositeMaterial = this.getCompositeMaterial(this.nMips)
-    this.compositeMaterial.uniforms[
-      'blurTexture1'
-    ].value = this.renderTargetsVertical[0].texture
-    this.compositeMaterial.uniforms[
-      'blurTexture2'
-    ].value = this.renderTargetsVertical[1].texture
-    this.compositeMaterial.uniforms[
-      'blurTexture3'
-    ].value = this.renderTargetsVertical[2].texture
-    this.compositeMaterial.uniforms[
-      'blurTexture4'
-    ].value = this.renderTargetsVertical[3].texture
-    this.compositeMaterial.uniforms[
-      'blurTexture5'
-    ].value = this.renderTargetsVertical[4].texture
+    this.compositeMaterial.uniforms['blurTexture1'].value =
+      this.renderTargetsVertical[0].texture
+    this.compositeMaterial.uniforms['blurTexture2'].value =
+      this.renderTargetsVertical[1].texture
+    this.compositeMaterial.uniforms['blurTexture3'].value =
+      this.renderTargetsVertical[2].texture
+    this.compositeMaterial.uniforms['blurTexture4'].value =
+      this.renderTargetsVertical[3].texture
+    this.compositeMaterial.uniforms['blurTexture5'].value =
+      this.renderTargetsVertical[4].texture
     this.compositeMaterial.uniforms['bloomStrength'].value = strength
     this.compositeMaterial.uniforms['bloomRadius'].value = 0.1
     this.compositeMaterial.needsUpdate = true
@@ -180,9 +178,8 @@ class TransparentBackgroundFixedUnrealBloomPass extends Pass {
       new Vector3(1, 1, 1),
       new Vector3(1, 1, 1)
     ]
-    this.compositeMaterial.uniforms[
-      'bloomTintColors'
-    ].value = this.bloomTintColors
+    this.compositeMaterial.uniforms['bloomTintColors'].value =
+      this.bloomTintColors
 
     // copy material
     if (CopyShader === undefined) {
@@ -299,9 +296,8 @@ class TransparentBackgroundFixedUnrealBloomPass extends Pass {
       renderer.clear()
       this.fsQuad.render(renderer)
 
-      this.separableBlurMaterials[i].uniforms[
-        'colorTexture'
-      ].value = this.renderTargetsHorizontal[i].texture
+      this.separableBlurMaterials[i].uniforms['colorTexture'].value =
+        this.renderTargetsHorizontal[i].texture
       this.separableBlurMaterials[i].uniforms['direction'].value =
         TransparentBackgroundFixedUnrealBloomPass.BlurDirectionY
       renderer.setRenderTarget(this.renderTargetsVertical[i])
@@ -316,9 +312,8 @@ class TransparentBackgroundFixedUnrealBloomPass extends Pass {
     this.fsQuad.material = this.compositeMaterial
     this.compositeMaterial.uniforms['bloomStrength'].value = this.strength
     this.compositeMaterial.uniforms['bloomRadius'].value = this.radius
-    this.compositeMaterial.uniforms[
-      'bloomTintColors'
-    ].value = this.bloomTintColors
+    this.compositeMaterial.uniforms['bloomTintColors'].value =
+      this.bloomTintColors
 
     renderer.setRenderTarget(this.renderTargetsHorizontal[0])
     renderer.clear()
@@ -327,9 +322,8 @@ class TransparentBackgroundFixedUnrealBloomPass extends Pass {
     // Blend it additively over the input texture
 
     this.fsQuad.material = this.materialCopy
-    this.copyUniforms[
-      'tDiffuse'
-    ].value = this.renderTargetsHorizontal[0].texture
+    this.copyUniforms['tDiffuse'].value =
+      this.renderTargetsHorizontal[0].texture
 
     if (maskActive) renderer.state.buffers.stencil.setTest(true)
 
