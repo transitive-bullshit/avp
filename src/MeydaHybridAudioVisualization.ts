@@ -1,7 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable prefer-const */
-/* eslint-disable no-unused-vars */
-
 import { TextureLoader, Vector2 } from 'three'
 
 // import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass'
@@ -131,7 +127,7 @@ export class MeydaHybridAudioVisualization extends HybridAudioVisualization {
     {
       // should be after any passes we don't want affected by effects
       const t = new TextureLoader().load('/bg0.jpg')
-      const pass = this.composer.addPass(new BGPass(t))
+      this.composer.addPass(new BGPass(t))
     }
   }
 
@@ -255,6 +251,7 @@ export class MeydaHybridAudioVisualization extends HybridAudioVisualization {
       return
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     meanS /= n
     // console.log(minS, maxS, meanS)
     // const diff = maxS - meanS
@@ -283,8 +280,6 @@ export class MeydaHybridAudioVisualization extends HybridAudioVisualization {
   }
 
   protected _draw() {
-    const n = this._samples.length
-    const n0 = n
     const { width, height } = this.offscreenCanvas
 
     const drawSamples = (
