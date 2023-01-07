@@ -13,6 +13,7 @@ import { GlitchPass } from 'three/examples/jsm/postprocessing/GlitchPass'
 import { BGPass } from './BGPass'
 
 import Meyda from 'meyda'
+import type { MeydaAnalyzer } from 'meyda/dist/esm/meyda-wa'
 
 import {
   HybridAudioVisualization,
@@ -61,7 +62,7 @@ export interface MeydaHybridVisualizationOptions
 }
 
 export class MeydaHybridAudioVisualization extends HybridAudioVisualization {
-  meyda: Meyda.MeydaAnalyzer
+  meyda: MeydaAnalyzer
   drawStyle: DrawStyle
   drawShape: DrawShape
   featureExtractor: MeydaAudioFeature
