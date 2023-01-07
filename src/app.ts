@@ -41,6 +41,8 @@ export interface Params {
   mirror: boolean
   bloom: boolean
   glitch: boolean
+
+  isRecordingEnabled: boolean
 }
 
 let vis: AudioViz | null = null
@@ -60,7 +62,8 @@ const params: Params = {
   fill: true,
   mirror: true,
   bloom: true,
-  glitch: false
+  glitch: false,
+  isRecordingEnabled: true
 }
 
 const gui = new dat.GUI({})
@@ -178,6 +181,18 @@ gui
       vis.glitch = value
     }
   })
+gui
+  .add(params, 'isRecordingEnabled')
+  .name('record')
+  .onChange((value) => {
+    if (vis) {
+      if (vis.isPlaying) {
+        vis.stop()
+      }
+
+      vis.isRecordingEnabled = value
+    }
+  })
 
 function reset() {
   if (!vis) {
@@ -187,8 +202,11 @@ function reset() {
   restart()
 }
 
-function restart() {
+function restart(autoplay = false) {
+  let isPlaying = false
   if (vis) {
+    isPlaying = vis.isPlaying
+
     vis.stop()
     vis = null
   }
@@ -196,6 +214,7 @@ function restart() {
   const canvas = document.getElementById('canvas') as HTMLCanvasElement
   canvas.width = 480
   canvas.height = 480
+  console.log(params)
 
   vis = new AudioViz({
     canvas,
@@ -205,9 +224,30 @@ function restart() {
     fftSize: 1 << params.fftSizePower,
     bufferSize: 1 << params.bufferSizePower
   })
+  ;(globalThis as any).vis = vis
 
-  vis.start()
+  if (isPlaying || autoplay) {
+    vis.start()
+  }
 }
 
 const play = document.getElementById('play')
-play?.addEventListener('click', restart)
+play?.addEventListener('click', () => {
+  if (!vis || !vis.isPlaying) {
+    restart(true)
+  }
+})
+
+const pause = document.getElementById('pause')
+pause?.addEventListener('click', () => {
+  if (vis) {
+    vis.pause()
+  }
+})
+
+const stop = document.getElementById('stop')
+stop?.addEventListener('click', () => {
+  if (vis) {
+    vis.stop()
+  }
+})

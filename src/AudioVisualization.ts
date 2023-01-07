@@ -13,28 +13,45 @@ export interface AudioVisualizationOptions {
    */
   canvas: HTMLCanvasElement | OffscreenCanvas
 
+  // input audio
   mediaElement?: HTMLMediaElement
   mediaStream?: MediaStream
   mediaUrl?: string
 
+  // misc settings
   autoplay?: boolean
   fftSize?: number
+  isRecordingEnabled?: boolean
+  frameRequestRate?: number
+
+  mediaRecorderOptions?: MediaRecorderOptions
 }
 
 export type AnimationStatus = 'stopped' | 'playing'
 
 export abstract class AudioVisualization {
+  // visual output canvas
   canvas: HTMLCanvasElement | OffscreenCanvas
 
+  // audio input
   mediaElement?: HTMLMediaElement
   mediaStream?: MediaStream
   mediaUrl?: string
 
+  // recording output
+  mediaRecorder?: MediaRecorder
+  recordingP?: Promise<void>
+  frameRequestRate: number
+  mediaRecorderOptions: MediaRecorderOptions
+  mediaRecorderChunks: BlobPart[] = []
+
+  // internal audio analysis
   listener: ThreeAudioListener
   audio: ThreeAudio
   analyser: ThreeAudioAnalyser
 
   protected _rafHandle: number | null
+  protected _isRecordingEnabled: boolean
 
   constructor(opts: AudioVisualizationOptions) {
     this._rafHandle = null
@@ -52,8 +69,16 @@ export abstract class AudioVisualization {
     this.listener = new ThreeAudioListener()
     this.audio = new ThreeAudio(this.listener)
 
+    this._isRecordingEnabled = !!opts.isRecordingEnabled
+    this.frameRequestRate = opts.frameRequestRate ?? 24
+    this.mediaRecorderOptions = {
+      mimeType: 'video/webm',
+      ...opts.mediaRecorderOptions
+    }
+
     if (this.mediaUrl) {
       if (/(iPad|iPhone|iPod)/g.test(navigator.userAgent)) {
+        // TODO: this will break recording right now
         const loader = new ThreeAudioLoader()
         loader.load(this.mediaUrl, (buffer: any) => {
           this.audio.setBuffer(buffer)
@@ -85,13 +110,12 @@ export abstract class AudioVisualization {
 
     const fftSize = opts.fftSize || 1024
     this.analyser = new ThreeAudioAnalyser(this.audio, fftSize)
-
-    window.addEventListener('resize', this._resize.bind(this))
+    // window.addEventListener('resize', this._resize.bind(this))
   }
 
   dispose() {
     this.stop()
-    window.removeEventListener('resize', this._resize.bind(this))
+    // window.removeEventListener('resize', this._resize.bind(this))
     this.audio.disconnect()
   }
 
@@ -99,32 +123,158 @@ export abstract class AudioVisualization {
     // TODO: override in subclass
   }
 
-  public get isPlaying() {
-    return this.audio.isPlaying
+  public get isPlaying(): boolean {
+    // TODO: this is super janky
+    return !!(
+      this.mediaElement &&
+      this.mediaElement!.currentTime > 0 &&
+      !this.mediaElement!.paused &&
+      !this.mediaElement!.ended &&
+      this.mediaElement!.readyState > 2
+    )
+    // return this.audio.isPlaying
+  }
+
+  public get isRecordingEnabled() {
+    return this._isRecordingEnabled
+  }
+
+  public set isRecordingEnabled(value: boolean) {
+    if (!!value !== this._isRecordingEnabled) {
+      if (this.isPlaying) {
+        throw new Error(
+          'AudioVisualization.isRecordingEnabled may only be set when audio is stopped'
+        )
+      }
+
+      this._isRecordingEnabled = !!value
+    }
+  }
+
+  public get isRecording() {
+    return this._isRecordingEnabled && this.isPlaying
   }
 
   public start() {
     if (!this.isPlaying) {
-      if (this.mediaElement) {
-        this.mediaElement.play()
-      }
+      console.log('RECORDING', this._isRecordingEnabled)
+
+      this.mediaElement?.play()
       this.audio.play()
       this._animate()
+
+      if (this._isRecordingEnabled) {
+        // TODO: handle pausing
+        // TODO: does this work with offscreencanvas?
+        const captureStream = (this.canvas as HTMLCanvasElement).captureStream(
+          this.frameRequestRate
+        )
+
+        const waitForAudioTrackP = new Promise<void>((resolve, reject) => {
+          const stream: MediaStream =
+            this.mediaStream ?? (this.mediaElement as any).captureStream()
+          let audioTracks = stream.getAudioTracks()
+
+          if (audioTracks.length) {
+            for (const audioTrack of audioTracks) {
+              console.log('audio track', audioTrack)
+              captureStream.addTrack(audioTrack)
+            }
+            resolve()
+          } else {
+            setTimeout(
+              () =>
+                reject(
+                  new Error(
+                    'timeout initializing audio track for mediarecorder'
+                  )
+                ),
+              10000
+            )
+
+            stream.onaddtrack = (ev) => {
+              let hasAudioTrack = false
+              audioTracks = stream.getAudioTracks()
+              for (const audioTrack of audioTracks) {
+                if (audioTrack.id === ev.track.id) {
+                  console.log('audio track', audioTrack)
+                  hasAudioTrack = true
+                  captureStream.addTrack(audioTrack)
+                }
+              }
+
+              if (hasAudioTrack) {
+                resolve()
+              }
+            }
+          }
+        })
+
+        console.log({
+          captureStream,
+          mediaRecorderOptions: this.mediaRecorderOptions
+        })
+
+        this.mediaRecorder = new MediaRecorder(
+          captureStream,
+          this.mediaRecorderOptions
+        )
+        this.mediaRecorderChunks = []
+
+        this.recordingP = new Promise<void>((resolve, reject) => {
+          if (!this.mediaRecorder) return
+
+          this.mediaRecorder.ondataavailable = (e: any) =>
+            this.mediaRecorderChunks.push(e.data)
+          this.mediaRecorder.onerror = (ev) => {
+            console.warn('mediarecorder ERROR', ev)
+            reject(ev)
+          }
+          this.mediaRecorder.onstop = (ev) => {
+            console.log('mediarecorder STOP', ev)
+            resolve()
+          }
+
+          waitForAudioTrackP
+            .then(() => {
+              this.mediaRecorder?.start()
+            })
+            .catch(reject)
+        }).then(() => {
+          // TODO: cleanup
+          const mimeType = this.mediaRecorderOptions.mimeType
+          const blob = new Blob(this.mediaRecorderChunks, {
+            type: mimeType
+          })
+          const p = mimeType!.split('/')
+          const ext = p[p.length - 1]
+
+          const filename = `test.${ext}`
+          console.log('download', blob.size, filename)
+
+          const downloadAnchor = document.createElement('a')
+          downloadAnchor.onclick = () => {
+            downloadAnchor.href = URL.createObjectURL(blob)
+            downloadAnchor.download = filename
+          }
+          downloadAnchor.click()
+        })
+      }
     }
   }
 
   public pause() {
-    if (this.mediaElement) {
-      this.mediaElement.pause()
-    }
+    this.mediaRecorder?.pause()
+    this.mediaElement?.pause()
     this.audio.pause()
     this._cancelAnimation()
   }
 
   public stop() {
-    if (this.mediaElement) {
-      this.mediaElement.pause()
-    }
+    this.mediaRecorder?.stop()
+    delete this.mediaRecorder
+
+    this.mediaElement?.pause()
     this.audio.stop()
     this._cancelAnimation()
   }
