@@ -5,8 +5,7 @@ import {
   MeshBasicMaterial,
   CanvasTexture,
   PlaneGeometry,
-  Mesh,
-  TextureLoader
+  Mesh
 } from 'three'
 
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer'
