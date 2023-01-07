@@ -43,6 +43,8 @@ export interface Params {
   glitch: boolean
 
   isRecordingEnabled: boolean
+  width: number
+  height: number
 }
 
 let vis: AudioViz | null = null
@@ -63,7 +65,9 @@ const params: Params = {
   mirror: true,
   bloom: true,
   glitch: false,
-  isRecordingEnabled: true
+  isRecordingEnabled: true,
+  width: 480,
+  height: 480
 }
 
 const gui = new dat.GUI({})
@@ -212,8 +216,8 @@ function restart(autoplay = false) {
   }
 
   const canvas = document.getElementById('canvas') as HTMLCanvasElement
-  canvas.width = 480
-  canvas.height = 480
+  canvas.width = params.width
+  canvas.height = params.height
   console.log(params)
 
   vis = new AudioViz({

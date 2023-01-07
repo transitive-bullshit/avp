@@ -126,7 +126,7 @@ export class MeydaHybridAudioVisualization extends HybridAudioVisualization {
 
     {
       // should be after any passes we don't want affected by effects
-      const t = new TextureLoader().load('/bg0.jpg')
+      const t = new TextureLoader().load('/bg1.jpg')
       this.composer.addPass(new BGPass(t))
     }
   }

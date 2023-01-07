@@ -7,11 +7,17 @@
 - [x] add stroke styles in addition to fill
 - [x] add circle style
 - [x] add mirror option
+- [ ] fix output pixel density
+- [ ] start/pause/stop should be async
+- [ ] separate download or get blob methods
+- [ ] mp4 output support
+- [ ] render offscreen sped-up
 - [ ] add gif to readme
 - [ ] add basic docs
 - [ ] hosted demo
 - [ ] explore backgrounds, color palettes, and avatars
 - [ ] explore different post-processing effects
+- [ ] add descript-style text
 
 ## Inspiration
 

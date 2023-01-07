@@ -23,16 +23,8 @@ body {
   background: #eee;
 }
 
-#canvas {
-  position: absolute;
-  width: 480px;
-  height: 480px;
-}
-
 #container {
   position: relative;
-  width: 480px;
-  height: 480px;
 }
 
 #controls {

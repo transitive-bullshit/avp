@@ -70,7 +70,7 @@ export abstract class AudioVisualization {
     this.audio = new ThreeAudio(this.listener)
 
     this._isRecordingEnabled = !!opts.isRecordingEnabled
-    this.frameRequestRate = opts.frameRequestRate ?? 24
+    this.frameRequestRate = opts.frameRequestRate ?? 25
     this.mediaRecorderOptions = {
       mimeType: 'video/webm',
       ...opts.mediaRecorderOptions
@@ -157,8 +157,6 @@ export abstract class AudioVisualization {
 
   public start() {
     if (!this.isPlaying) {
-      console.log('RECORDING', this._isRecordingEnabled)
-
       this.mediaElement?.play()
       this.audio.play()
       this._animate()

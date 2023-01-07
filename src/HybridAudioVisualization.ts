@@ -78,8 +78,7 @@ export class HybridAudioVisualization extends AudioVisualization {
 
     this.composer = new EffectComposer(this.renderer)
     this.composer.setSize(this.canvas.width, this.canvas.height)
-    const p1 = new RenderPass(this.scene, this.camera)
-    this.composer.addPass(p1)
+    this.composer.addPass(new RenderPass(this.scene, this.camera))
   }
 
   protected _resize() {
