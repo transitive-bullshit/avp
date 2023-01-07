@@ -2,7 +2,6 @@ lockfileVersion: 5.4
 
 specifiers:
   '@types/dat.gui': ^0.7.7
-  '@types/meyda': ^4.3.2
   '@types/node': ^18.11.18
   '@types/raf': ^3.4.0
   '@types/three': 0.131.0
@@ -12,7 +11,7 @@ specifiers:
   eslint: ^8.31.0
   eslint-config-prettier: ^8.6.0
   eslint-plugin-prettier: ^4.2.1
-  meyda: ^5.2.2
+  meyda: ^5.5.1
   npm-run-all: ^4.1.5
   prettier: ^2.8.1
   raf: ^3.4.1
@@ -24,14 +23,13 @@ specifiers:
 
 dependencies:
   dat.gui: 0.7.9
-  meyda: 5.2.2
+  meyda: 5.5.1
   raf: 3.4.1
   random: 4.1.0
   three: 0.131.3
 
 devDependencies:
   '@types/dat.gui': 0.7.7
-  '@types/meyda': 4.3.2
   '@types/node': 18.11.18
   '@types/raf': 3.4.0
   '@types/three': 0.131.0
@@ -746,10 +744,6 @@ packages:
     resolution: {integrity: sha512-BQ5aZNSCpj7D6K2ksrRCTmKRLEpnPvWDiLPfoGyhZ++8YtiK9d/3DBKPJgry359X/P1PfruyYwvnvwFjuEiEIg==}
     dependencies:
       '@types/node': 18.11.18
-    dev: true
-
-  /@types/meyda/4.3.2:
-    resolution: {integrity: sha512-nCcSTz3+xOLRfVCbxMx1B/lCK8wOnRos4q6oIo08Bxim9JP29oQLeYcTARmzDj2IXyclZoxfehpYxOpTUF7/lQ==}
     dev: true
 
   /@types/node/18.11.18:
@@ -4965,9 +4959,9 @@ packages:
     engines: {node: '>= 8'}
     dev: true
 
-  /meyda/5.2.2:
-    resolution: {integrity: sha512-yuS/whwD7JT8eTqM8eVxNRdAgs+FWjzrqjttg871FM3WJ3E1A/HlsmoLKobKYJUv9WB02pcmWnsn2/v/8OBOsA==}
-    engines: {node: ^10 || ^12 || ^13 || ^14 || ^15 || ^16}
+  /meyda/5.5.1:
+    resolution: {integrity: sha512-NS7K6w3byxyQfdmAGjHJrrkmqvFGYHYVZcbaLaMT0LAIf9KrNyuW4gghvk6nJrNAs4uq/UG7Tx2hRfCcuUQ5SA==}
+    engines: {node: ^10 || ^12 || ^13 || ^14 || ^15 || ^16 || ^17}
     hasBin: true
     dependencies:
       dct: 0.1.0
