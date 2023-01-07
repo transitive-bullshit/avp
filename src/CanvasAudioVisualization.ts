@@ -11,7 +11,9 @@ export class CanvasAudioVisualization extends AudioVisualization {
 
     const ctx = this.canvas.getContext('2d')
     if (ctx) {
-      this.ctx = ctx
+      this.ctx = ctx as
+        | CanvasRenderingContext2D
+        | OffscreenCanvasRenderingContext2D
     } else {
       throw new Error('Unable to initialize canvas 2d context')
     }

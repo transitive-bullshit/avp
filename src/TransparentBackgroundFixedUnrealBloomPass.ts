@@ -110,7 +110,6 @@ class TransparentBackgroundFixedUnrealBloomPass extends Pass {
       this.renderTargetsVertical.push(renderTargetVertical)
 
       resx = Math.round(resx / 2)
-
       resy = Math.round(resy / 2)
     }
 
@@ -149,7 +148,6 @@ class TransparentBackgroundFixedUnrealBloomPass extends Pass {
       )
 
       resx = Math.round(resx / 2)
-
       resy = Math.round(resy / 2)
     }
 
@@ -208,7 +206,6 @@ class TransparentBackgroundFixedUnrealBloomPass extends Pass {
     this.oldClearAlpha = 1
 
     this.basic = new MeshBasicMaterial()
-
     this.fsQuad = new FullScreenQuad()
   }
 
@@ -244,7 +241,7 @@ class TransparentBackgroundFixedUnrealBloomPass extends Pass {
     }
   }
 
-  render(
+  override render(
     renderer: WebGLRenderer,
     writeBuffer: any,
     readBuffer: { texture: Texture },
@@ -281,7 +278,7 @@ class TransparentBackgroundFixedUnrealBloomPass extends Pass {
     renderer.clear()
     this.fsQuad.render(renderer)
 
-    // 2. Blur All the mips progressively
+    // 2. Blur all the mips progressively
 
     let inputRenderTarget = this.renderTargetBright
 
@@ -307,7 +304,7 @@ class TransparentBackgroundFixedUnrealBloomPass extends Pass {
       inputRenderTarget = this.renderTargetsVertical[i]
     }
 
-    // Composite All the mips
+    // Composite all the mips
 
     this.fsQuad.material = this.compositeMaterial
     this.compositeMaterial.uniforms['bloomStrength'].value = this.strength
@@ -326,6 +323,8 @@ class TransparentBackgroundFixedUnrealBloomPass extends Pass {
       this.renderTargetsHorizontal[0].texture
 
     if (maskActive) renderer.state.buffers.stencil.setTest(true)
+
+    // console.log('renderToScreen', this.renderToScreen)
 
     if (this.renderToScreen) {
       renderer.setRenderTarget(null)

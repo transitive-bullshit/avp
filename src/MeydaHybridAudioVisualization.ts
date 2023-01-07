@@ -2,12 +2,15 @@
 /* eslint-disable prefer-const */
 /* eslint-disable no-unused-vars */
 
+import { TextureLoader } from 'three'
+
 // import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass'
 import { UnrealBloomPass } from './TransparentBackgroundFixedUnrealBloomPass'
 // import { BloomPass } from 'three/examples/jsm/postprocessing/BloomPass'
 // import { AfterimagePass } from 'three/examples/jsm/postprocessing/AfterimagePass'
 // import { FilmPass } from 'three/examples/jsm/postprocessing/FilmPass'
 import { GlitchPass } from 'three/examples/jsm/postprocessing/GlitchPass'
+import { BGPass } from './BGPass'
 
 import Meyda from 'meyda'
 
@@ -125,6 +128,12 @@ export class MeydaHybridAudioVisualization extends HybridAudioVisualization {
     //   const effect1 = new AfterimagePass()
     //   this.composer.addPass(effect1)
     // }
+
+    {
+      // should be after any passes we don't want affected by effects
+      const t = new TextureLoader().load('/bg0.jpg')
+      const pass = this.composer.addPass(new BGPass(t))
+    }
   }
 
   get bloom(): boolean {
@@ -136,7 +145,10 @@ export class MeydaHybridAudioVisualization extends HybridAudioVisualization {
       this._bloom = !!value
 
       if (this._bloom) {
-        this.composer.insertPass(this._bloomPass, 1)
+        this.composer.insertPass(
+          this._bloomPass,
+          Math.max(1, this.composer.passes.length - 1)
+        )
       } else {
         this.composer.removePass(this._bloomPass)
       }
@@ -152,7 +164,10 @@ export class MeydaHybridAudioVisualization extends HybridAudioVisualization {
       this._glitch = !!value
 
       if (this._glitch) {
-        this.composer.insertPass(this._glitchPass, this.composer.passes.length)
+        this.composer.insertPass(
+          this._glitchPass,
+          Math.max(1, this.composer.passes.length - 1)
+        )
       } else {
         this.composer.removePass(this._glitchPass)
       }
@@ -182,6 +197,8 @@ export class MeydaHybridAudioVisualization extends HybridAudioVisualization {
     this._draw()
 
     // render without post-processing
+    // this.renderer.clear()
+    // this.renderer.render(this.scene2, this.camera)
     // this.renderer.render(this.scene, this.camera)
 
     // render with post-processing

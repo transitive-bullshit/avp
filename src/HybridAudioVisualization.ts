@@ -5,11 +5,12 @@ import {
   MeshBasicMaterial,
   CanvasTexture,
   PlaneGeometry,
-  Mesh
+  Mesh,
+  TextureLoader
 } from 'three'
 
-import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js'
-import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js'
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer'
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass'
 
 import {
   AudioVisualization,
@@ -61,20 +62,10 @@ export class HybridAudioVisualization extends AudioVisualization {
     this.renderer.setSize(this.canvas.width, this.canvas.height)
     this.renderer.setClearColor(0x000000, 0.0)
     this.renderer.setPixelRatio(window.devicePixelRatio)
+    // this.renderer.autoClear = false
 
     this.scene = new Scene()
     this.camera = new Camera()
-
-    // {
-    //   const material = new MeshBasicMaterial()
-    //   const t = new TextureLoader().load('/bg0.jpg')
-    //   material.map = t
-
-    //   const geometry = new PlaneGeometry(2, 2)
-    //   const mesh = new Mesh(geometry, material)
-    //   // mesh.scale.setY(-1)
-    //   this.scene.add(mesh)
-    // }
 
     {
       this.offscreenCanvasMaterial = new MeshBasicMaterial()
@@ -88,7 +79,8 @@ export class HybridAudioVisualization extends AudioVisualization {
 
     this.composer = new EffectComposer(this.renderer)
     this.composer.setSize(this.canvas.width, this.canvas.height)
-    this.composer.addPass(new RenderPass(this.scene, this.camera))
+    const p1 = new RenderPass(this.scene, this.camera)
+    this.composer.addPass(p1)
   }
 
   protected _resize() {

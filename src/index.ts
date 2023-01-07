@@ -39,7 +39,7 @@ const params = {
   visualScalingFactor: 1.0,
   fill: true,
   mirror: true,
-  bloom: true,
+  bloom: false,
   glitch: false
 }
 
