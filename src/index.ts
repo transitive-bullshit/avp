@@ -23,9 +23,29 @@ const audioTracks: { [key: string]: string } = {
   "where'd you go": audioUrl4
 }
 
+export interface Params {
+  audioTrack: string
+
+  offscreenScale: number
+  fftSizePower: number
+  bufferSizePower: number
+
+  drawStyle: DrawStyle
+  drawShape: DrawShape
+  featureExtractor: MeydaAudioFeature
+  smoothingFactor: number
+  accentuationFactor: number
+  visualScalingFactor: number
+  numberOfBarkBands: number
+  fill: boolean
+  mirror: boolean
+  bloom: boolean
+  glitch: boolean
+}
+
 let vis: AudioViz | null = null
 
-const params = {
+const params: Params = {
   audioTrack: 'li jin',
   featureExtractor: 'loudness' as MeydaAudioFeature,
   drawStyle: 'curves' as DrawStyle,
@@ -39,7 +59,7 @@ const params = {
   visualScalingFactor: 1.0,
   fill: true,
   mirror: true,
-  bloom: false,
+  bloom: true,
   glitch: false
 }
 
