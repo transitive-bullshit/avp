@@ -7,7 +7,6 @@
   "plugins": ["@typescript-eslint"],
   "extends": [
     "plugin:@typescript-eslint/recommended",
-    "standard",
     "plugin:prettier/recommended"
   ],
   "env": { "browser": true, "node": true },
