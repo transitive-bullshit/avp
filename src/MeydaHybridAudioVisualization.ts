@@ -2,7 +2,7 @@
 /* eslint-disable prefer-const */
 /* eslint-disable no-unused-vars */
 
-import { TextureLoader } from 'three'
+import { TextureLoader, Vector2 } from 'three'
 
 // import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass'
 import { UnrealBloomPass } from './TransparentBackgroundFixedUnrealBloomPass'
@@ -109,9 +109,7 @@ export class MeydaHybridAudioVisualization extends HybridAudioVisualization {
     } as any)
 
     // setup post-processing shader effects
-    // @ts-ignore; TODO
-    // this._bloomPass = new UnrealBloomPass({ x: 256, y: 256 }, 1.0, 0.1) // defaults
-    this._bloomPass = new UnrealBloomPass({ x: 256, y: 256 }, 1.0, 0.1)
+    this._bloomPass = new UnrealBloomPass(new Vector2(256, 256), 1.0, 0.1)
 
     // TODO: maybe make glitches respond to audio signal peaks?
     this._glitchPass = new GlitchPass()

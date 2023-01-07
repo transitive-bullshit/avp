@@ -9,16 +9,9 @@
     "plugin:@typescript-eslint/recommended",
     "plugin:prettier/recommended"
   ],
-  "env": { "browser": true, "node": true },
+  "env": { "browser": true },
   "rules": {
-    "@typescript-eslint/explicit-module-boundary-types": 0,
     "@typescript-eslint/no-explicit-any": 0,
-    "@typescript-eslint/no-non-null-assertion": 0,
-    "@typescript-eslint/ban-ts-comment": 0,
-    "no-use-before-define": 0,
-    "space-before-function-paren": 0
-  },
-  "globals": {
-    "OffscreenCanvasRenderingContext2D": true
+    "@typescript-eslint/no-non-null-assertion": 0
   }
 }

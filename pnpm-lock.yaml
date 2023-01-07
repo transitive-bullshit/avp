@@ -4,7 +4,6 @@ specifiers:
   '@types/dat.gui': ^0.7.7
   '@types/meyda': ^4.3.2
   '@types/node': ^18.11.18
-  '@types/offscreencanvas': ^2019.7.0
   '@types/raf': ^3.4.0
   '@types/three': 0.131.0
   '@typescript-eslint/eslint-plugin': ^5.48.0
@@ -34,7 +33,6 @@ devDependencies:
   '@types/dat.gui': 0.7.7
   '@types/meyda': 4.3.2
   '@types/node': 18.11.18
-  '@types/offscreencanvas': 2019.7.0
   '@types/raf': 3.4.0
   '@types/three': 0.131.0
   '@typescript-eslint/eslint-plugin': 5.48.0_k73wpmdolxikpyqun3p36akaaq
@@ -760,10 +758,6 @@ packages:
 
   /@types/normalize-package-data/2.4.0:
     resolution: {integrity: sha512-f5j5b/Gf71L+dbqxIpQ4Z2WlmI/mPJ0fOkGGmFgtb6sAu97EPczzbS3/tJKxmcYDj55OX6ssqwDAWOHIYDRDGA==}
-    dev: true
-
-  /@types/offscreencanvas/2019.7.0:
-    resolution: {integrity: sha512-PGcyveRIpL1XIqK8eBsmRBt76eFgtzuPiSTyKHZxnGemp2yzGzWpjYKAfK3wIMiU7eH+851yEpiuP8JZerTmWg==}
     dev: true
 
   /@types/raf/3.4.0:

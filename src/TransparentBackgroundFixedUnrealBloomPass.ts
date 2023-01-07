@@ -63,13 +63,13 @@ class TransparentBackgroundFixedUnrealBloomPass extends Pass {
     resolution: Vector2,
     strength: number,
     radius: number,
-    threshold: number
+    threshold?: number
   ) {
     super()
 
     this.strength = strength !== undefined ? strength : 1
     this.radius = radius
-    this.threshold = threshold
+    this.threshold = threshold ?? 0
     this.resolution =
       resolution !== undefined
         ? new Vector2(resolution.x, resolution.y)
