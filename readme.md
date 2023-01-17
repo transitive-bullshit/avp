@@ -1,5 +1,7 @@
-https://user-images.githubusercontent.com/552829/212808615-b0851d98-078d-4249-9a7b-9d7c085fd95f.mp4
-_(quick demo; enable sound)_
+<p align="center">
+  <video width="480" src="https://user-images.githubusercontent.com/552829/212808615-b0851d98-078d-4249-9a7b-9d7c085fd95f.mp4"></video>
+  <i>(quick demo; enable sound)</i>
+</p>
 
 # Audio Visual Playground
 
