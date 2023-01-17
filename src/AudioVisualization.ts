@@ -70,9 +70,11 @@ export abstract class AudioVisualization {
     this.audio = new ThreeAudio(this.listener)
 
     this._isRecordingEnabled = !!opts.isRecordingEnabled
-    this.frameRequestRate = opts.frameRequestRate ?? 25
+    this.frameRequestRate = opts.frameRequestRate ?? 60
     this.mediaRecorderOptions = {
       mimeType: 'video/webm',
+      audioBitsPerSecond: 128000,
+      videoBitsPerSecond: 4500000,
       ...opts.mediaRecorderOptions
     }
 
@@ -155,7 +157,7 @@ export abstract class AudioVisualization {
     return this._isRecordingEnabled && this.isPlaying
   }
 
-  public start() {
+  public async start() {
     if (!this.isPlaying) {
       this.mediaElement?.play()
       this.audio.play()
@@ -257,6 +259,8 @@ export abstract class AudioVisualization {
           }
           downloadAnchor.click()
         })
+
+        return waitForAudioTrackP
       }
     }
   }

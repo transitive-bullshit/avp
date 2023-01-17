@@ -1,5 +1,5 @@
 import { defineConfig } from 'vite'
 
 export default defineConfig({
-  assetsInclude: ['audio/*.mp3', 'audio/*.m4a']
+  assetsInclude: ['media/*.mp4', 'media/audio/*.mp3', 'media/audio/*.m4a']
 })

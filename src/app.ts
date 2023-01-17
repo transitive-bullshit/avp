@@ -1,10 +1,12 @@
 import * as dat from 'dat.gui'
 
-import audioUrl0 from '../audio/voice.m4a'
-import audioUrl1 from '../audio/Wizard-DreamOn.mp3'
-import audioUrl2 from '../audio/ChillyGonzales-SampleThis.mp3'
-import audioUrl3 from '../audio/EverythingPersists-AndThenYouSeeIt.mp3'
-import audioUrl4 from '../audio/FortMinor-WheredYouGo.mp3'
+import demo0 from '../media/audio/demo.m4a'
+import coupling0 from '../media/audio/hotd-podcast-coupling-clip.m4a'
+import audioUrl0 from '../media/audio/voice.m4a'
+import audioUrl1 from '../media/audio/Wizard-DreamOn.mp3'
+import audioUrl2 from '../media/audio/ChillyGonzales-SampleThis.mp3'
+import audioUrl3 from '../media/audio/EverythingPersists-AndThenYouSeeIt.mp3'
+import audioUrl4 from '../media/audio/FortMinor-WheredYouGo.mp3'
 
 // import { CanvasAudioVisualization as AudioViz } from './CanvasAudioVisualization'
 // import { HybridAudioVisualization as AudioViz } from './HybridAudioVisualization'
@@ -16,6 +18,8 @@ import {
 } from './MeydaHybridAudioVisualization'
 
 const audioTracks: { [key: string]: string } = {
+  transitive_bs: demo0,
+  coupling: coupling0,
   'li jin': audioUrl0,
   'dream on': audioUrl1,
   'sample this': audioUrl2,
@@ -50,7 +54,7 @@ export interface Params {
 let vis: AudioViz | null = null
 
 const params: Params = {
-  audioTrack: 'li jin',
+  audioTrack: 'transitive_bs',
   featureExtractor: 'loudness' as MeydaAudioFeature,
   drawStyle: 'curves' as DrawStyle,
   drawShape: 'triangle' as DrawShape,
@@ -65,7 +69,7 @@ const params: Params = {
   mirror: true,
   bloom: true,
   glitch: false,
-  isRecordingEnabled: true,
+  isRecordingEnabled: false,
   width: 480,
   height: 480
 }
