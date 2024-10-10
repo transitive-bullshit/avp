@@ -158,111 +158,109 @@ export abstract class AudioVisualization {
   }
 
   public async start() {
-    if (!this.isPlaying) {
-      this.mediaElement?.play()
-      this.audio.play()
-      this._animate()
+    if (this.isPlaying) return
 
-      if (this._isRecordingEnabled) {
-        // TODO: handle pausing
-        // TODO: does this work with offscreencanvas?
-        const captureStream = (this.canvas as HTMLCanvasElement).captureStream(
-          this.frameRequestRate
+    this.mediaElement?.play()
+    this.audio.play()
+    this._animate()
+
+    if (!this._isRecordingEnabled) return
+
+    // TODO: handle pausing
+    // TODO: does this work with offscreencanvas?
+    const captureStream = (this.canvas as HTMLCanvasElement).captureStream(
+      this.frameRequestRate
+    )
+
+    const waitForAudioTrackP = new Promise<void>((resolve, reject) => {
+      const stream: MediaStream =
+        this.mediaStream ?? (this.mediaElement as any).captureStream()
+      let audioTracks = stream.getAudioTracks()
+
+      if (audioTracks.length) {
+        for (const audioTrack of audioTracks) {
+          console.log('audio track', audioTrack)
+          captureStream.addTrack(audioTrack)
+        }
+        resolve()
+      } else {
+        setTimeout(
+          () =>
+            reject(
+              new Error('timeout initializing audio track for mediarecorder')
+            ),
+          10000
         )
 
-        const waitForAudioTrackP = new Promise<void>((resolve, reject) => {
-          const stream: MediaStream =
-            this.mediaStream ?? (this.mediaElement as any).captureStream()
-          let audioTracks = stream.getAudioTracks()
-
-          if (audioTracks.length) {
-            for (const audioTrack of audioTracks) {
+        stream.onaddtrack = (ev) => {
+          let hasAudioTrack = false
+          audioTracks = stream.getAudioTracks()
+          for (const audioTrack of audioTracks) {
+            if (audioTrack.id === ev.track.id) {
               console.log('audio track', audioTrack)
+              hasAudioTrack = true
               captureStream.addTrack(audioTrack)
             }
-            resolve()
-          } else {
-            setTimeout(
-              () =>
-                reject(
-                  new Error(
-                    'timeout initializing audio track for mediarecorder'
-                  )
-                ),
-              10000
-            )
-
-            stream.onaddtrack = (ev) => {
-              let hasAudioTrack = false
-              audioTracks = stream.getAudioTracks()
-              for (const audioTrack of audioTracks) {
-                if (audioTrack.id === ev.track.id) {
-                  console.log('audio track', audioTrack)
-                  hasAudioTrack = true
-                  captureStream.addTrack(audioTrack)
-                }
-              }
-
-              if (hasAudioTrack) {
-                resolve()
-              }
-            }
           }
-        })
 
-        console.log({
-          captureStream,
-          mediaRecorderOptions: this.mediaRecorderOptions
-        })
-
-        this.mediaRecorder = new MediaRecorder(
-          captureStream,
-          this.mediaRecorderOptions
-        )
-        this.mediaRecorderChunks = []
-
-        this.recordingP = new Promise<void>((resolve, reject) => {
-          if (!this.mediaRecorder) return
-
-          this.mediaRecorder.ondataavailable = (e: any) =>
-            this.mediaRecorderChunks.push(e.data)
-          this.mediaRecorder.onerror = (ev) => {
-            console.warn('mediarecorder ERROR', ev)
-            reject(ev)
-          }
-          this.mediaRecorder.onstop = (ev) => {
-            console.log('mediarecorder STOP', ev)
+          if (hasAudioTrack) {
             resolve()
           }
-
-          waitForAudioTrackP
-            .then(() => {
-              this.mediaRecorder?.start()
-            })
-            .catch(reject)
-        }).then(() => {
-          // TODO: cleanup
-          const mimeType = this.mediaRecorderOptions.mimeType
-          const blob = new Blob(this.mediaRecorderChunks, {
-            type: mimeType
-          })
-          const p = mimeType!.split('/')
-          const ext = p[p.length - 1]
-
-          const filename = `test.${ext}`
-          console.log('download', blob.size, filename)
-
-          const downloadAnchor = document.createElement('a')
-          downloadAnchor.onclick = () => {
-            downloadAnchor.href = URL.createObjectURL(blob)
-            downloadAnchor.download = filename
-          }
-          downloadAnchor.click()
-        })
-
-        return waitForAudioTrackP
+        }
       }
-    }
+    })
+
+    console.log({
+      captureStream,
+      mediaRecorderOptions: this.mediaRecorderOptions
+    })
+
+    this.mediaRecorder = new MediaRecorder(
+      captureStream,
+      this.mediaRecorderOptions
+    )
+    this.mediaRecorderChunks = []
+
+    this.recordingP = new Promise<void>((resolve, reject) => {
+      if (!this.mediaRecorder) return
+
+      this.mediaRecorder.ondataavailable = (e: any) =>
+        this.mediaRecorderChunks.push(e.data)
+      this.mediaRecorder.onerror = (ev) => {
+        console.warn('mediarecorder ERROR', ev)
+        reject(ev)
+      }
+      this.mediaRecorder.onstop = (ev) => {
+        console.log('mediarecorder STOP', ev)
+        resolve()
+      }
+
+      waitForAudioTrackP
+        .then(() => {
+          this.mediaRecorder?.start()
+        })
+        .catch(reject)
+    }).then(() => {
+      // TODO: cleanup
+      const mimeType = this.mediaRecorderOptions.mimeType
+      const blob = new Blob(this.mediaRecorderChunks, {
+        type: mimeType
+      })
+      const p = mimeType!.split('/')
+      const ext = p[p.length - 1]
+
+      const filename = `test.${ext}`
+      console.log('download', blob.size, filename)
+
+      const downloadAnchor = document.createElement('a')
+      downloadAnchor.onclick = () => {
+        downloadAnchor.href = URL.createObjectURL(blob)
+        downloadAnchor.download = filename
+      }
+      downloadAnchor.click()
+    })
+
+    return waitForAudioTrackP
   }
 
   public pause() {

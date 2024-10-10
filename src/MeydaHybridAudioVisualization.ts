@@ -1,4 +1,8 @@
-import { TextureLoader, Vector2, VideoTexture } from 'three'
+import {
+  TextureLoader,
+  Vector2
+  //, VideoTexture
+} from 'three'
 
 // import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass'
 import { UnrealBloomPass } from './TransparentBackgroundFixedUnrealBloomPass'
@@ -75,7 +79,7 @@ export class MeydaHybridAudioVisualization extends HybridAudioVisualization {
   _bloomPass: UnrealBloomPass
   _glitchPass: GlitchPass
 
-  _bg: HTMLVideoElement
+  _bg?: HTMLVideoElement
 
   constructor(opts: MeydaHybridVisualizationOptions) {
     super(opts)
@@ -128,13 +132,13 @@ export class MeydaHybridAudioVisualization extends HybridAudioVisualization {
 
     {
       // should be after any passes we don't want affected by effects
-      const video = document.createElement('video')
-      video.src = '/bg.mp4'
-      video.loop = true
-      this._bg = video
-      const t = new VideoTexture(video)
+      // const video = document.createElement('video')
+      // video.src = '/bg.mp4'
+      // video.loop = true
+      // this._bg = video
+      // const t = new VideoTexture(video)
 
-      // const t = new TextureLoader().load('/bg1.jpg')
+      const t = new TextureLoader().load('/bg1.jpg')
       this.composer.addPass(new BGPass(t))
     }
   }
@@ -178,7 +182,7 @@ export class MeydaHybridAudioVisualization extends HybridAudioVisualization {
   }
 
   async start() {
-    this._bg.play()
+    this._bg?.play()
     // if (this._bg) {
     //   await new Promise((resolve, reject) => {
     //     this._bg.onabort('
